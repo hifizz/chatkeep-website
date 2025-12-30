@@ -32,27 +32,16 @@ const geistMono = Geist_Mono({
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark')
-                } else {
-                  document.documentElement.classList.remove('dark')
-                }
-              } catch (_) {}
-            `,
-          }}
-        />
-      </head>
-      <body className="bg-[color:var(--marketing-surface)] text-[color:var(--marketing-ink)] font-sans antialiased">
+    <html
+      lang="en"
+      className={`${geist.variable} ${geistMono.variable} dark`}
+      suppressHydrationWarning
+    >
+      <body className="bg-neutral-950 text-neutral-50 font-sans antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}
