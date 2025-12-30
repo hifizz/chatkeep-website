@@ -65,11 +65,11 @@ const browsers = [
 ];
 
 const aiPlatforms = [
-  { name: "Gemini", icon: Gemini, status: "available" },
+  { name: "Gemini", icon: Gemini.Color, status: "available" },
   { name: "ChatGPT", icon: OpenAI, status: "available" },
-  { name: "Deepseek", icon: DeepSeek, status: "coming", eta: "Coming in 5 days" },
+  { name: "Deepseek", icon: DeepSeek.Color, status: "coming", eta: "Coming in 5 days" },
   { name: "Grok", icon: Grok, status: "coming", eta: "Coming in 10 days" },
-  { name: "Doubao", icon: Doubao, status: "coming", eta: "Coming in 15 days" },
+  { name: "Doubao", icon: Doubao.Color, status: "coming", eta: "Coming in 15 days" },
 ];
 
 function InstallChromeButton() {
@@ -96,8 +96,8 @@ export default function HomePage() {
           </span>
         </h1>
         <p className="max-w-2xl text-xl text-[color:var(--marketing-muted)] md:text-2xl">
-          The missing OS for your AI chats. Aggregate, highlight, and search your conversations with
-          Gemini (and soon ChatGPT).
+          The missing OS for your AI chats. Auto-save, aggregate, highlight, and search your
+          conversations locally.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <InstallChromeButton />
