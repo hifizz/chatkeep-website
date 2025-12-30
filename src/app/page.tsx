@@ -1,6 +1,8 @@
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
+import { DeepSeek, Doubao, Gemini, OpenAI, Grok } from "@lobehub/icons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 
 const featureCards = [
   {
@@ -54,6 +56,22 @@ const useCases = [
   },
 ];
 
+const browsers = [
+  { name: "Chrome", icon: "logos:chrome" },
+  { name: "Firefox", icon: "logos:firefox" },
+  { name: "Safari", icon: "logos:safari" },
+  { name: "Edge", icon: "logos:microsoft-edge" },
+  { name: "Brave", icon: "logos:brave" },
+];
+
+const aiPlatforms = [
+  { name: "Gemini", icon: Gemini, status: "available" },
+  { name: "ChatGPT", icon: OpenAI, status: "available" },
+  { name: "Deepseek", icon: DeepSeek, status: "coming", eta: "Coming in 5 days" },
+  { name: "Grok", icon: Grok, status: "coming", eta: "Coming in 10 days" },
+  { name: "Doubao", icon: Doubao, status: "coming", eta: "Coming in 15 days" },
+];
+
 function InstallChromeButton() {
   return (
     <Link
@@ -90,7 +108,69 @@ export default function HomePage() {
             View Pricing
           </Link>
         </div>
-        <div className="flex items-center gap-2 text-sm text-[color:var(--marketing-muted)]">
+
+        {/* Browser Icons */}
+        <div className="flex flex-col items-center gap-3 mt-4">
+          <p className="text-xs font-semibold uppercase tracking-widest text-[color:var(--marketing-muted)] opacity-70">
+            Available on
+          </p>
+          <div className="flex items-center gap-6 opacity-60 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0">
+            {browsers.map((b) => (
+              <Tooltip key={b.name}>
+                <TooltipTrigger asChild>
+                  <div className="cursor-pointer hover:scale-110 transition-transform">
+                    <Icon icon={b.icon} width={24} height={24} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{b.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+        </div>
+
+        {/* AI Platforms */}
+        <div className="mt-8 flex flex-col items-center gap-6 w-full max-w-3xl">
+          <div className="h-px w-full max-w-xs bg-gradient-to-r from-transparent via-[color:var(--marketing-border)] to-transparent opacity-50"></div>
+          <p className="text-sm font-semibold text-[color:var(--marketing-muted)]">
+            Support for your favorite AI models
+          </p>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
+            {aiPlatforms.map((platform) => (
+              <div
+                key={platform.name}
+                className={`relative transition-all duration-300 ${platform.status === "coming" ? "opacity-30 grayscale hover:opacity-60" : "hover:scale-110"}`}
+              >
+                {platform.status === "coming" ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-help">
+                        <platform.icon size={48} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{platform.eta}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-pointer">
+                        <platform.icon size={48} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{platform.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-[color:var(--marketing-muted)] mt-4">
           <Icon icon="lucide:check-circle" className="text-green-500" />
           <span>Free plan available</span>
           <span className="mx-2 opacity-30">|</span>
