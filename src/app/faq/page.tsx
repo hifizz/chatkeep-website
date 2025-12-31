@@ -29,13 +29,11 @@ export default function FAQPage() {
     <MarketingShell>
       <section className="mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-16 pt-12">
         <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--marketing-muted)]">
-            FAQ
-          </p>
-          <h1 className="font-display text-4xl text-[color:var(--marketing-ink)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">FAQ</p>
+          <h1 className="font-display text-4xl text-white">
             Answers to the most common questions.
           </h1>
-          <p className="text-sm text-[color:var(--marketing-muted)]">
+          <p className="text-sm text-neutral-400">
             These answers are designed for clarity and direct responses.
           </p>
         </div>
@@ -44,12 +42,10 @@ export default function FAQPage() {
           {faqs.map((faq) => (
             <div
               key={faq.question}
-              className="rounded-3xl border border-[color:var(--marketing-border)] bg-white p-6"
+              className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 hover:bg-neutral-900 transition-colors"
             >
-              <h2 className="text-lg font-semibold text-[color:var(--marketing-ink)]">
-                {faq.question}
-              </h2>
-              <p className="mt-2 text-sm text-[color:var(--marketing-muted)]">{faq.answer}</p>
+              <h2 className="text-lg font-semibold text-white">{faq.question}</h2>
+              <p className="mt-2 text-sm text-neutral-400">{faq.answer}</p>
             </div>
           ))}
         </div>

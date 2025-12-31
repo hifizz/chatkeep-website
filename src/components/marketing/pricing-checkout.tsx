@@ -45,19 +45,17 @@ export function PricingCheckoutGrid() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[color:var(--marketing-border)] bg-white px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--marketing-muted)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
             Payment
           </p>
-          <p className="text-sm text-[color:var(--marketing-muted)]">
-            Choose Stripe or Creem at checkout.
-          </p>
+          <p className="text-sm text-neutral-400">Choose Stripe or Creem at checkout.</p>
         </div>
         <select
           value={provider}
           onChange={(event) => setProvider(event.target.value as BillingProvider)}
-          className="rounded-full border border-[color:var(--marketing-border)] bg-white px-4 py-2 text-sm"
+          className="rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm text-white focus:border-neutral-700 focus:outline-none"
         >
           {PROVIDER_OPTIONS.map((option) => (
             <option key={option.id} value={option.id}>
@@ -68,7 +66,7 @@ export function PricingCheckoutGrid() {
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-2xl border border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-200">
           {error}
         </div>
       ) : null}
@@ -77,33 +75,27 @@ export function PricingCheckoutGrid() {
         {PRICING_PLANS.map((plan) => (
           <div
             key={plan.key}
-            className="flex h-full flex-col justify-between rounded-3xl border border-[color:var(--marketing-border)] bg-white p-6 shadow-sm"
+            className="flex h-full flex-col justify-between rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 shadow-sm transition hover:bg-neutral-900"
           >
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-semibold text-[color:var(--marketing-muted)]">
-                  {plan.name}
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-[color:var(--marketing-ink)]">
-                  {plan.priceLabel}
-                </p>
-                <p className="mt-2 text-sm text-[color:var(--marketing-muted)]">{plan.summary}</p>
+                <p className="text-sm font-semibold text-neutral-400">{plan.name}</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{plan.priceLabel}</p>
+                <p className="mt-2 text-sm text-neutral-400">{plan.summary}</p>
               </div>
 
-              <ul className="space-y-3 text-sm text-[color:var(--marketing-muted)]">
+              <ul className="space-y-3 text-sm text-neutral-400">
                 {plan.features.map((feature) => (
                   <li key={feature.label} className="flex items-start gap-2">
                     <span
                       className={`mt-1 h-2.5 w-2.5 rounded-full ${
-                        feature.status === "available"
-                          ? "bg-[color:var(--marketing-ink)]"
-                          : "border border-[color:var(--marketing-border)]"
+                        feature.status === "available" ? "bg-white" : "border border-neutral-700"
                       }`}
                     />
                     <span>
                       {feature.label}
                       {feature.status === "coming" && (
-                        <span className="ml-2 rounded-full border border-[color:var(--marketing-border)] px-2 py-0.5 text-[10px] uppercase tracking-wide">
+                        <span className="ml-2 rounded-full border border-neutral-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-neutral-500">
                           Coming soon
                         </span>
                       )}
@@ -116,7 +108,7 @@ export function PricingCheckoutGrid() {
             {plan.key === "free" ? (
               <Link
                 href="/install"
-                className="mt-6 inline-flex items-center justify-center rounded-full bg-[color:var(--marketing-ink)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200"
               >
                 {plan.cta}
               </Link>
@@ -125,7 +117,7 @@ export function PricingCheckoutGrid() {
                 type="button"
                 onClick={() => handleCheckout(plan.key)}
                 disabled={loadingPlan === plan.key}
-                className="mt-6 inline-flex items-center justify-center rounded-full bg-[color:var(--marketing-ink)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingPlan === plan.key ? "Redirecting..." : plan.cta}
               </button>

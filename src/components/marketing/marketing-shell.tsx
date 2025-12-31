@@ -12,7 +12,7 @@ const navItems = [
 
 export function MarketingShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen bg-neutral-950 text-neutral-50 font-sans selection:bg-blue-500/30 selection:text-blue-200">
+    <div className="relative min-h-screen flex flex-col bg-neutral-950 text-neutral-50 font-sans selection:bg-blue-500/30 selection:text-blue-200">
       {/* Sticky Header */}
 
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-neutral-950/80 backdrop-blur-md transition-all duration-200 hover:border-white/10">
@@ -48,7 +48,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="relative z-10">{children}</main>
+      <main className="relative z-10 flex-1">{children}</main>
 
       <footer className="relative z-10 border-t border-neutral-800 bg-neutral-950">
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 text-sm text-neutral-400 md:flex-row md:justify-between">

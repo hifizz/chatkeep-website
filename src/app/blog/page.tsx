@@ -20,13 +20,11 @@ export default function BlogPage() {
     <MarketingShell>
       <section className="mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-16 pt-12">
         <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--marketing-muted)]">
-            Blog
-          </p>
-          <h1 className="font-display text-4xl text-[color:var(--marketing-ink)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Blog</p>
+          <h1 className="font-display text-4xl text-white">
             Product updates, workflows, and field notes.
           </h1>
-          <p className="text-sm text-[color:var(--marketing-muted)]">
+          <p className="text-sm text-neutral-400">
             We share how we build ChatKeep, plus practical workflows for power users.
           </p>
         </div>
@@ -35,15 +33,13 @@ export default function BlogPage() {
           {upcomingPosts.map((post) => (
             <div
               key={post.title}
-              className="flex items-center justify-between rounded-3xl border border-[color:var(--marketing-border)] bg-white p-6"
+              className="flex items-center justify-between rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 hover:bg-neutral-900 transition-colors"
             >
               <div>
-                <p className="text-lg font-semibold text-[color:var(--marketing-ink)]">
-                  {post.title}
-                </p>
-                <p className="text-xs text-[color:var(--marketing-muted)]">Stay tuned.</p>
+                <p className="text-lg font-semibold text-white">{post.title}</p>
+                <p className="text-xs text-neutral-400">Stay tuned.</p>
               </div>
-              <span className="rounded-full border border-[color:var(--marketing-border)] px-3 py-1 text-xs uppercase tracking-wide text-[color:var(--marketing-muted)]">
+              <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs uppercase tracking-wide text-neutral-500">
                 {post.label}
               </span>
             </div>

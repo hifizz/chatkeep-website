@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { DeepSeek, Doubao, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { HeroImage } from "~/components/marketing/hero-image";
 
 const featureCards = [
   {
@@ -76,9 +77,9 @@ function InstallChromeButton() {
   return (
     <Link
       href="/install"
-      className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105"
+      className="inline-flex items-center justify-center gap-2 rounded-full bg-white p-3 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105"
     >
-      <Icon icon="logos:chrome" width={24} height={24} aria-hidden="true" className="shrink-0" />
+      <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
       <span>Install for Chrome</span>
     </Link>
   );
@@ -107,7 +108,7 @@ export default function HomePage() {
           <InstallChromeButton />
           <Link
             href="/pricing"
-            className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800"
+            className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
           >
             Free start
           </Link>
@@ -144,7 +145,7 @@ export default function HomePage() {
             {aiPlatforms.map((platform) => (
               <div
                 key={platform.name}
-                className={`relative transition-all duration-300 ${platform.status === "coming" ? "opacity-20 grayscale hover:opacity-40" : "hover:scale-110"}`}
+                className={`relative transition-all duration-300 ${platform.status === "coming" ? "opacity-60 grayscale hover:opacity-40" : "hover:scale-110"}`}
               >
                 {platform.status === "coming" ? (
                   <Tooltip>
@@ -184,42 +185,7 @@ export default function HomePage() {
       </section>
 
       {/* Hero Image / UI Placeholder */}
-      <div className="mx-auto max-w-6xl px-6 pb-20 animate-fade">
-        <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/50">
-          {/* Placeholder for the actual app screenshot. Using a simple UI representation. */}
-          <div className="absolute inset-0 bg-neutral-950">
-            <div className="absolute top-0 left-0 right-0 h-12 border-b border-neutral-800 bg-neutral-900 flex items-center px-4 gap-2">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-neutral-700"></div>
-                <div className="w-3 h-3 rounded-full bg-neutral-700"></div>
-                <div className="w-3 h-3 rounded-full bg-neutral-700"></div>
-              </div>
-              <div className="mx-auto w-1/3 h-6 bg-neutral-800 rounded-md"></div>
-            </div>
-
-            <div className="absolute top-12 bottom-0 left-0 md:left-64 p-8 flex flex-col gap-6 items-center justify-center text-neutral-500">
-              <div className="text-center space-y-2">
-                <Icon
-                  icon="lucide:message-square"
-                  width={48}
-                  height={48}
-                  className="mx-auto opacity-10"
-                />
-                <p className="text-lg font-medium text-neutral-400">Your Chat Knowledge Base</p>
-                <p className="text-sm opacity-60 text-neutral-600">
-                  Visual placeholder for app screenshot
-                </p>
-              </div>
-            </div>
-
-            <div className="absolute top-12 bottom-0 right-0 w-64 border-r border-neutral-800 bg-neutral-900 p-4 space-y-3 hidden md:block">
-              <div className="h-4 w-3/4 bg-neutral-800 rounded"></div>
-              <div className="h-4 w-1/2 bg-neutral-800 rounded"></div>
-              <div className="h-4 w-5/6 bg-neutral-800 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <HeroImage />
 
       {/* Features Grid */}
       <section className="mx-auto max-w-6xl px-6 py-24">
@@ -308,9 +274,9 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/install"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-neutral-950 transition hover:bg-neutral-200"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-4 text-base font-bold text-neutral-950 transition hover:bg-neutral-200"
             >
-              <Icon icon="logos:chrome" width={24} height={24} aria-hidden="true" />
+              <Icon icon="logos:chrome" width={32} height={32} aria-hidden="true" />
               <span>Install for Chrome</span>
             </Link>
           </div>
