@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { rpcClient, parseRpcResponse } from "~/lib/rpc-client";
 import { PRICING_PLANS } from "~/lib/pricing";
-import type { BillingProvider, CheckoutResponseDTO, PlanKey } from "~/lib/billing/types";
-
-const PROVIDER_OPTIONS: Array<{ id: BillingProvider; label: string }> = [
-  { id: "stripe", label: "Stripe" },
-  { id: "creem", label: "Creem" },
-];
+import { useSession } from "~/lib/auth-client";
+import type { CheckoutResponseDTO, PlanKey } from "~/lib/billing/types";
 
 export function PricingCheckoutGrid() {
-  const [provider, setProvider] = useState<BillingProvider>("stripe");
+  const router = useRouter();
+  const { data: session } = useSession();
   const [loadingPlan, setLoadingPlan] = useState<PlanKey | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckout = async (planKey: PlanKey) => {
+    if (!session) {
+      router.push("/login?callbackUrl=/pricing");
+      return;
+    }
+
     setError(null);
     setLoadingPlan(planKey);
 
@@ -24,7 +27,7 @@ export function PricingCheckoutGrid() {
       const response = await rpcClient.rpc.billing.checkout.$post({
         json: {
           planKey,
-          provider,
+          provider: "creem",
         },
       });
       const { data, error: rpcError } = await parseRpcResponse<CheckoutResponseDTO>(response);
@@ -45,26 +48,6 @@ export function PricingCheckoutGrid() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
-            Payment
-          </p>
-          <p className="text-sm text-neutral-400">Choose Stripe or Creem at checkout.</p>
-        </div>
-        <select
-          value={provider}
-          onChange={(event) => setProvider(event.target.value as BillingProvider)}
-          className="rounded-full border border-neutral-800 bg-neutral-950 px-4 py-2 text-sm text-white focus:border-neutral-700 focus:outline-none"
-        >
-          {PROVIDER_OPTIONS.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {error ? (
         <div className="rounded-2xl border border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-200">
           {error}
