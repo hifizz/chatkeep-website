@@ -1,0 +1,4 @@
+- [ ] Modify `src/components/marketing/pricing-checkout.tsx` to remove the provider selector and "Choose Stripe or Creem" text. <!-- id: 0 -->
+- [ ] Update `PricingCheckoutGrid` to default the provider to `'creem'` and remove the state toggle. <!-- id: 1 -->
+- [ ] Integrate `useSession` hook in `PricingCheckoutGrid`. <!-- id: 2 -->
+- [ ] Update `handleCheckout` to redirect to `/login` if the user is not authenticated. <!-- id: 3 -->

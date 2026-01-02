@@ -456,4 +456,11 @@ openspec validate --strict # Is it correct?
 openspec archive <change-id> [--yes|-y]  # Mark complete (add --yes for automation)
 ```
 
+## Project Tooling Notes
+
+- Linting uses ESLint (`pnpm lint`, `pnpm lint:fix`).
+- Formatting uses Prettier (`pnpm format`, `pnpm format:check`).
+- Type checks run with `pnpm typecheck`.
+- Husky pre-commit runs lint, format check, and typecheck.
+
 Remember: Specs are truth. Changes are proposals. Keep them in sync.

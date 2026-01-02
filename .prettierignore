@@ -1,0 +1,9 @@
+openspec/**
+docs/**
+AGENTS.md
+pnpm-lock.yaml
+tsconfig.json
+eslint.config.mjs
+
+src/components/ui/*
+

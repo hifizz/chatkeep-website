@@ -1,0 +1,11 @@
+## 1. Implementation
+- [x] 1.1 Add Hono and Hono Zod validator dependencies.
+- [x] 1.2 Create a Hono app module with base path and route registration.
+- [x] 1.3 Add Zod-based request validators for RPC endpoints.
+- [x] 1.4 Add better-auth session middleware for protected routes.
+- [x] 1.5 Add a typed hc client helper for frontend usage.
+- [x] 1.6 Add an example RPC endpoint to validate the pipeline.
+- [x] 1.7 Update docs to explain the RPC usage and auth requirements.
+- [x] 1.8 Add a client error handling helper and usage example.
+- [x] 1.9 Add a demo page that mounts the RPC example component.
+- [x] 1.10 Run pnpm format:check, pnpm lint, and pnpm typecheck.

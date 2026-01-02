@@ -2,18 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { signIn } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { notifyAuthRefresh } from "~/lib/extension";
 
 export function LoginForm() {
   const router = useRouter();
@@ -32,9 +27,10 @@ export function LoginForm() {
       if (result.error) {
         setError(result.error.message ?? "An unknown error occurred");
       } else {
+        notifyAuthRefresh();
         router.push("/");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred.");
     }
   };
@@ -43,9 +39,7 @@ export function LoginForm() {
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
+        <CardDescription>Enter your email below to login to your account</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
@@ -82,14 +76,11 @@ export function LoginForm() {
           </Link>
         </div>
         <div className="mt-2 text-center text-sm">
-          <Link
-            href="/forgot-password"
-            className="underline"
-          >
+          <Link href="/forgot-password" className="underline">
             Forgot your password?
           </Link>
         </div>
       </CardContent>
     </Card>
   );
-} 
+}

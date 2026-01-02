@@ -1,8 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { creem } from "@creem_io/better-auth";
 import { db } from "~/server/db";
 import { env } from "~/env";
 import { sendEmail } from "./email";
+import { syncCreemRefundEvent, syncCreemSubscriptionEvent } from "~/server/billing/creem-sync";
 
 const ResetPasswordTemplate = ({ url }: { url: string }) => `
   <div>
@@ -11,6 +13,26 @@ const ResetPasswordTemplate = ({ url }: { url: string }) => `
     <a href="${url}">Reset Password</a>
   </div>
 `;
+
+const creemPlugin = env.CREEM_API_KEY
+  ? creem({
+      apiKey: env.CREEM_API_KEY,
+      webhookSecret: env.CREEM_WEBHOOK_SECRET,
+      testMode: env.NODE_ENV !== "production",
+      defaultSuccessUrl: "/billing/success",
+      persistSubscriptions: false,
+      onSubscriptionActive: syncCreemSubscriptionEvent,
+      onSubscriptionTrialing: syncCreemSubscriptionEvent,
+      onSubscriptionCanceled: syncCreemSubscriptionEvent,
+      onSubscriptionPaid: syncCreemSubscriptionEvent,
+      onSubscriptionExpired: syncCreemSubscriptionEvent,
+      onSubscriptionUnpaid: syncCreemSubscriptionEvent,
+      onSubscriptionUpdate: syncCreemSubscriptionEvent,
+      onSubscriptionPastDue: syncCreemSubscriptionEvent,
+      onSubscriptionPaused: syncCreemSubscriptionEvent,
+      onRefundCreated: syncCreemRefundEvent,
+    })
+  : null;
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -28,4 +50,5 @@ export const auth = betterAuth({
   },
   secret: env.BETTER_AUTH_SECRET,
   baseUrl: env.BETTER_AUTH_URL,
+  plugins: creemPlugin ? [creemPlugin] : [],
 });

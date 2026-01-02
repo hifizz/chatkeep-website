@@ -23,8 +23,7 @@ export function ForgotPasswordForm() {
         return { error: result.error };
       }
       return {
-        successMessage:
-          "If an account with that email exists, we've sent a password reset link.",
+        successMessage: "If an account with that email exists, we've sent a password reset link.",
       };
     });
   };

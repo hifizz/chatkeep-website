@@ -27,34 +27,52 @@
 
 1. **克隆仓库:**
 
-    ```bash
-    git clone https://github.com/your-repo/fullstack-starter.git
-    ```
+   ```bash
+   git clone https://github.com/your-repo/fullstack-starter.git
+   ```
 
 2. **安装依赖:**
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   pnpm install
+   ```
 
 3. **配置环境变量:**
-    - 将 `.env.example` 复制为 `.env`。
-    - 填入必要的变量 (数据库连接字符串、Auth密钥、Resend API密钥)。
+   - 将 `.env.example` 复制为 `.env`。
+   - 填入必要的变量 (数据库连接字符串、Auth密钥、Resend API密钥)。
+   - 若需扩展跨域访问，请配置 `AUTH_ALLOWED_ORIGINS`（逗号分隔）。
 4. **推送数据库 Schema:**（[详细说明文档](./docs/DATABASE_zh.md)）
 
-    ```bash
-    # 通过 docker 起一个数据库服务。
-    ./start-database.sh
-    ```
+   ```bash
+   # 通过 docker 起一个数据库服务。
+   ./start-database.sh
+   ```
 
-    ```bash
-    pnpm db:push
-    ```
+   ```bash
+   pnpm db:push
+   ```
 
 5. **运行开发服务器:**
 
-    ```bash
-    pnpm dev
-    ```
+   ```bash
+   pnpm dev
+   ```
 
 在浏览器中打开 [http://localhost:3000](http://localhost:3000) 查看效果。
+
+## 常用脚本
+
+- `pnpm dev` - 启动开发服务器
+- `pnpm build` - 生产构建
+- `pnpm start` - 启动生产服务
+- `pnpm preview` - 本地构建并启动
+- `pnpm lint` - ESLint 检查
+- `pnpm lint:fix` - ESLint 自动修复
+- `pnpm format` - Prettier 格式化
+- `pnpm format:check` - Prettier 格式检查
+- `pnpm typecheck` - TypeScript 类型检查
+
+## 质量门禁
+
+- Husky 在 pre-commit 中执行 `pnpm lint`、`pnpm format:check`、`pnpm typecheck`。
+- CI 会执行 lint、format check、typecheck 和 build。

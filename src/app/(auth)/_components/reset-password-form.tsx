@@ -16,7 +16,7 @@ function ResetPasswordFormComponent() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const { error, success, loading, formAction, setSuccess } = useAuthForm();
+  const { error, success, loading, formAction } = useAuthForm();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

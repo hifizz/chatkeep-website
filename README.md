@@ -27,32 +27,49 @@ This starter is designed to be **minimalist and production-ready**. The goal is 
 
 1. **Clone the repository:**
 
-    ```bash
-    git clone https://github.com/your-repo/fullstack-starter.git
-    ```
+   ```bash
+   git clone https://github.com/your-repo/fullstack-starter.git
+   ```
 
 2. **Install dependencies:**
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   pnpm install
+   ```
 
 3. **Set up environment variables:**
-    - Copy `.env.example` to `.env`.
-    - Fill in the required variables (database URL, auth secret, Resend API key).
+   - Copy `.env.example` to `.env`.
+   - Fill in the required variables (database URL, auth secret, Resend API key).
 4. **Push the database schema:**（[Detail](./docs/DATABASE_zh.md)）
 
-    ```bash
-    pnpm db:push
-    ```
+   ```bash
+   pnpm db:push
+   ```
 
 5. **Run the development server:**
 
-    ```bash
-    pnpm dev
-    ```
+   ```bash
+   pnpm dev
+   ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the result.
+
+## Scripts
+
+- `pnpm dev` - Start the Next.js dev server.
+- `pnpm build` - Build for production.
+- `pnpm start` - Start the production server.
+- `pnpm preview` - Build and start locally.
+- `pnpm lint` - Run ESLint checks.
+- `pnpm lint:fix` - Fix ESLint issues where possible.
+- `pnpm format` - Format with Prettier.
+- `pnpm format:check` - Check formatting with Prettier.
+- `pnpm typecheck` - Run TypeScript type checks.
+
+## Quality Gates
+
+- Husky pre-commit runs `pnpm lint`, `pnpm format:check`, and `pnpm typecheck`.
+- CI runs lint, format check, typecheck, and build.
 
 ## Learn More
 
