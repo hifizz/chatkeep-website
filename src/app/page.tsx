@@ -68,8 +68,8 @@ const browsers = [
 const aiPlatforms = [
   { name: "Gemini", icon: Gemini.Color, status: "available" },
   { name: "ChatGPT", icon: OpenAI, status: "available" },
-  { name: "Deepseek", icon: DeepSeek.Color, status: "coming", eta: "Coming in 5 days" },
-  { name: "Grok", icon: Grok, status: "coming", eta: "Coming in 10 days" },
+  { name: "Deepseek", icon: DeepSeek.Color, status: "available" },
+  { name: "Grok", icon: Grok, status: "available" },
   { name: "Doubao", icon: Doubao.Color, status: "coming", eta: "Coming in 15 days" },
 ];
 
@@ -92,11 +92,7 @@ export default function HomePage() {
       <section className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 pt-12 pb-16 text-center md:pt-20 animate-rise">
         <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
           Chat smarter. <br className="hidden md:block" />
-          {/* <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-orange-400"> */}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500">
-            {/* <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-blue-500 to-blue-600"> */}
-            {/* <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-300 via-rose-400 to-orange-400"> */}
-            {/* <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981cc] via-[#10b981] to-[#059669cc]"> */}
             Keep everything.
           </span>
         </h1>
@@ -135,47 +131,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* AI Platforms */}
-        <div className="mt-4 flex flex-col items-center gap-6 w-full max-w-3xl">
-          <div className="h-px w-full max-w-xs bg-gradient-to-r from-transparent via-neutral-800 to-transparent opacity-50"></div>
-          <p className="text-sm font-semibold text-neutral-400">
-            Support for your favorite AI models
-          </p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
-            {aiPlatforms.map((platform) => (
-              <div
-                key={platform.name}
-                className={`relative transition-all duration-300 ${platform.status === "coming" ? "opacity-60 grayscale hover:opacity-40" : "hover:scale-110"}`}
-              >
-                {platform.status === "coming" ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <platform.icon size={48} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{platform.eta}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-pointer">
-                        <platform.icon size={48} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{platform.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 text-sm text-neutral-500 mt-4">
+        <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2">
           <Icon icon="lucide:check-circle" className="text-green-500" />
           <span>Free plan available</span>
           <span className="mx-2 opacity-30">|</span>
@@ -186,6 +142,49 @@ export default function HomePage() {
 
       {/* Hero Image / UI Placeholder */}
       <HeroImage />
+
+      {/* AI Platforms - Moved below Hero Image */}
+      <section className="mx-auto flex w-full max-w-6xl flex-col items-center gap-8 py-12 text-center">
+        <p className="text-sm font-semibold text-neutral-400">
+          Support for your favorite AI models
+        </p>
+        <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
+          {aiPlatforms.map((platform) => (
+            <div
+              key={platform.name}
+              className={`relative transition-all duration-300 ${
+                platform.status === "coming"
+                  ? "opacity-60 grayscale hover:opacity-40"
+                  : "hover:scale-110"
+              }`}
+            >
+              {platform.status === "coming" ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help">
+                      <platform.icon size={48} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{platform.eta}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-pointer">
+                      <platform.icon size={48} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{platform.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Features Grid */}
       <section className="mx-auto max-w-6xl px-6 py-24">
@@ -205,7 +204,10 @@ export default function HomePage() {
               className="group relative overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 transition hover:border-neutral-700 hover:bg-neutral-900"
             >
               <div
-                className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color.replace("bg-", "bg-opacity-20 bg-")}`}
+                className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color.replace(
+                  "bg-",
+                  "bg-opacity-20 bg-",
+                )}`}
               >
                 <Icon icon={feature.icon} width={28} height={28} />
               </div>
