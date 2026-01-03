@@ -4,7 +4,12 @@ import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 const featureCards = [
   {
@@ -75,48 +80,42 @@ const aiPlatforms = [
 
 function InstallChromeButton() {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="group flex items-center rounded-full bg-white p-1 pl-4 shadow-lg transition hover:bg-neutral-200 hover:scale-105">
       <Link
         href="/install"
-        className="inline-flex items-center justify-center gap-2 rounded-full bg-white p-3 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105 mb-1"
+        className="flex items-center gap-2 pr-2 text-base font-bold text-neutral-950"
       >
-        <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
+        <Icon icon="logos:chrome" width={24} height={24} aria-hidden="true" className="shrink-0" />
         <span>Install for Chrome</span>
       </Link>
-      <HoverCard openDelay={100} closeDelay={100}>
-        <HoverCardTrigger asChild>
-          <button
-            type="button"
-            className="text-xs font-medium text-neutral-500 underline decoration-neutral-700 underline-offset-4 transition hover:text-neutral-300"
-          >
-            Also available on other browsers
-          </button>
-        </HoverCardTrigger>
-        <HoverCardContent
-          className="w-auto border-neutral-800 bg-neutral-900 p-3"
-          side="bottom"
-          align="center"
+      <div className="mx-1 h-6 w-px bg-neutral-300" />
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-300 hover:text-neutral-900 focus:outline-none">
+          <Icon icon="lucide:chevron-down" width={16} height={16} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-48 border-neutral-800 bg-neutral-900 text-neutral-200"
         >
-          <div className="flex items-center gap-3">
-            {browsers
-              .filter((b) => b.name !== "Chrome")
-              .map((b) => (
-                <TooltipProvider key={b.name}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-pointer opacity-70 transition hover:scale-110 hover:opacity-100">
-                        <Icon icon={b.icon} width={24} height={24} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{b.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ))}
-          </div>
-        </HoverCardContent>
-      </HoverCard>
+          <div className="px-2 py-1.5 text-xs font-semibold text-neutral-500">Other Browsers</div>
+          {browsers
+            .filter((b) => b.name !== "Chrome")
+            .map((b) => (
+              <DropdownMenuItem
+                key={b.name}
+                className="cursor-pointer gap-2 focus:bg-neutral-800 focus:text-white"
+              >
+                <Icon icon={b.icon} width={16} height={16} />
+                <span>{b.name}</span>
+              </DropdownMenuItem>
+            ))}
+          <div className="my-1 h-px bg-neutral-800" />
+          <DropdownMenuItem disabled className="gap-2 opacity-50">
+            <Icon icon="lucide:download" width={16} height={16} />
+            <span>Manual Install (Soon)</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -138,19 +137,19 @@ export default function HomePage() {
             conversations locally.
           </p>
 
-          <div className="flex flex-wrap items-start justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <InstallChromeButton />
             <Link
-              href="/pricing"
+              href="#features"
               className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-3.5 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
             >
-              Free start
+              Killer features
             </Link>
           </div>
 
           {/* AI Platforms - Replaces Browsers Row */}
-          <div className="mt-2 flex  items-center gap-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70 mr-3">
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70">
               Works with
             </p>
             <div className="flex items-center gap-6">
@@ -166,7 +165,7 @@ export default function HomePage() {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{platform.name} supported</p>
+                      <p>{platform.name}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -188,7 +187,7 @@ export default function HomePage() {
       <HeroImage />
 
       {/* Features Grid */}
-      <section className="mx-auto max-w-6xl px-6 py-24">
+      <section id="features" className="mx-auto max-w-6xl px-6 py-24">
         <div className="mb-16 text-center">
           <h2 className="font-display text-4xl font-bold text-white">
             Everything you need to manage context.
