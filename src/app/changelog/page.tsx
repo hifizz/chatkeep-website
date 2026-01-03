@@ -16,7 +16,7 @@ const updates = [
 export default function ChangelogPage() {
   return (
     <MarketingShell>
-      <section className="mx-auto flex max-w-5xl flex-col gap-10 px-6 pb-16 pt-12">
+      <section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-16 pt-12">
         <div className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
             Changelog

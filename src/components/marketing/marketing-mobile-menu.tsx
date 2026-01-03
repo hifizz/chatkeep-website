@@ -7,11 +7,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useSession } from "~/lib/auth-client";
 
 const triggerClassName =
   "rounded-full border border-neutral-800 px-4 py-2 text-sm text-neutral-400 transition hover:text-white hover:border-neutral-700 focus:outline-none";
 
 export function MarketingMobileMenu({ items }: { items: Array<{ label: string; href: string }> }) {
+  const { data: session } = useSession();
+  const resolvedItems = items.map((item) =>
+    item.href === "/install" && session ? { label: "Profile", href: "/profile" } : item,
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={triggerClassName}>Menu</DropdownMenuTrigger>
@@ -19,7 +25,7 @@ export function MarketingMobileMenu({ items }: { items: Array<{ label: string; h
         align="end"
         className="min-w-[12rem] rounded-2xl border border-neutral-800 bg-neutral-900 p-2 text-sm text-neutral-400 shadow-xl"
       >
-        {items.map((item) => (
+        {resolvedItems.map((item) => (
           <DropdownMenuItem
             key={item.href}
             asChild

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingMobileMenu } from "~/components/marketing/marketing-mobile-menu";
+import { MarketingHeaderCta } from "~/components/marketing/marketing-header-cta";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -38,12 +39,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
               <MarketingMobileMenu items={navItems} />
             </div>
 
-            <Link
-              href="/install"
-              className="inline-flex h-9 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 active:scale-95"
-            >
-              Install
-            </Link>
+            <MarketingHeaderCta />
           </div>
         </div>
       </header>
