@@ -78,7 +78,7 @@ function InstallChromeButton() {
     <div className="flex flex-col items-center gap-2">
       <Link
         href="/install"
-        className="inline-flex items-center justify-center gap-2 rounded-full bg-white p-3 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105"
+        className="inline-flex items-center justify-center gap-2 rounded-full bg-white p-3 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105 mb-1"
       >
         <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
         <span>Install for Chrome</span>
@@ -138,7 +138,7 @@ export default function HomePage() {
             conversations locally.
           </p>
 
-          <div className="flex flex-wrap items-start justify-center gap-6">
+          <div className="flex flex-wrap items-start justify-center gap-3">
             <InstallChromeButton />
             <Link
               href="/pricing"
@@ -149,8 +149,8 @@ export default function HomePage() {
           </div>
 
           {/* AI Platforms - Replaces Browsers Row */}
-          <div className="mt-8 flex flex-col items-center gap-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70">
+          <div className="mt-2 flex  items-center gap-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70 mr-3">
               Works with
             </p>
             <div className="flex items-center gap-6">
@@ -166,7 +166,7 @@ export default function HomePage() {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{platform.name}</p>
+                      <p>{platform.name} supported</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
