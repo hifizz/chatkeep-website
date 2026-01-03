@@ -149,7 +149,7 @@ export default function HomePage() {
           </div>
 
           {/* AI Platforms - Replaces Browsers Row */}
-          <div className="mt-8 flex flex-col items-center gap-3">
+          <div className="mt-2 flex flex-col items-center gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70">
               Works with
             </p>
