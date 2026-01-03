@@ -81,83 +81,86 @@ export default function HomePage() {
   return (
     <MarketingShell>
       {/* Hero Section */}
-      <section className="relative mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 pt-12 pb-16 text-center md:pt-20 animate-rise">
+      <section className="relative mx-auto max-w-5xl px-6 pt-12 pb-16 text-center md:pt-20 animate-rise overflow-hidden">
         {/* Background Stickers */}
-        <div className="absolute top-0 left-4 hidden animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-forwards md:block md:-left-12 lg:-left-24">
+        <div className="absolute top-10 left-6 animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-forwards opacity-0 md:top-20 md:left-20 lg:left-32">
           <Gemini.Color
-            size={56}
-            className="-rotate-12 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+            size={48}
+            className="-rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-16 md:w-16"
           />
         </div>
 
-        <div className="absolute top-8 right-4 hidden animate-in fade-in zoom-in duration-1000 delay-500 fill-mode-forwards md:block md:-right-12 lg:-right-24">
+        <div className="absolute right-6 top-16 animate-in fade-in zoom-in duration-1000 delay-500 fill-mode-forwards opacity-0 md:right-20 md:top-24 lg:right-32">
           <OpenAI
-            size={56}
-            className="rotate-12 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+            size={48}
+            className="rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-16 md:w-16"
           />
         </div>
 
-        <div className="absolute bottom-32 left-8 hidden animate-in fade-in zoom-in duration-1000 delay-700 fill-mode-forwards md:block md:bottom-20 md:-left-8 lg:-left-16">
+        <div className="absolute bottom-40 left-8 animate-in fade-in zoom-in duration-1000 delay-700 fill-mode-forwards opacity-0 md:bottom-48 md:left-24 lg:left-40">
           <DeepSeek.Color
-            size={64}
-            className="rotate-6 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+            size={56}
+            className="rotate-6 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-20 md:w-20"
           />
         </div>
 
-        <div className="absolute bottom-36 right-10 hidden animate-in fade-in zoom-in duration-1000 delay-1000 fill-mode-forwards md:block md:bottom-24 md:-right-4 lg:-right-12">
+        <div className="absolute bottom-44 right-8 animate-in fade-in zoom-in duration-1000 delay-1000 fill-mode-forwards opacity-0 md:bottom-52 md:right-24 lg:right-40">
           <Grok
-            size={64}
-            className="-rotate-12 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+            size={56}
+            className="-rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-20 md:w-20"
           />
         </div>
 
-        <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
-          Chat smarter. <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500">
-            Keep everything.
-          </span>
-        </h1>
-        <p className="max-w-2xl text-xl text-neutral-400 md:text-2xl">
-          The missing OS for your AI chats. Auto-save, aggregate, highlight, and search your
-          conversations locally.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <InstallChromeButton />
-          <Link
-            href="/pricing"
-            className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
-          >
-            Free start
-          </Link>
-        </div>
-
-        {/* Browser Icons */}
-        <div className="flex items-center gap-3 mt-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70">
-            Available on
+        {/* Content Wrapper */}
+        <div className="relative z-10 flex flex-col items-center gap-6">
+          <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
+            Chat smarter. <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500">
+              Keep everything.
+            </span>
+          </h1>
+          <p className="max-w-2xl text-xl text-neutral-400 md:text-2xl">
+            The missing OS for your AI chats. Auto-save, aggregate, highlight, and search your
+            conversations locally.
           </p>
-          <div className="flex items-center gap-4">
-            {browsers.map((b) => (
-              <Tooltip key={b.name}>
-                <TooltipTrigger asChild>
-                  <div className="cursor-pointer hover:scale-110 will-change opacity-60 transition-all duration-300 hover:opacity-100">
-                    <Icon icon={b.icon} width={32} height={32} />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{b.name}</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <InstallChromeButton />
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
+            >
+              Free start
+            </Link>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2">
-          <Icon icon="lucide:check-circle" className="text-green-500" />
-          <span>Free plan available</span>
-          <span className="mx-2 opacity-30">|</span>
-          <Icon icon="lucide:shield-check" className="text-green-500" />
-          <span>Local-first & Private</span>
+          {/* Browser Icons */}
+          <div className="mt-4 flex items-center gap-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70">
+              Available on
+            </p>
+            <div className="flex items-center gap-4">
+              {browsers.map((b) => (
+                <Tooltip key={b.name}>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-pointer hover:scale-110 will-change opacity-60 transition-all duration-300 hover:opacity-100">
+                      <Icon icon={b.icon} width={32} height={32} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{b.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-2 flex items-center gap-2 text-sm text-neutral-500">
+            <Icon icon="lucide:check-circle" className="text-green-500" />
+            <span>Free plan available</span>
+            <span className="mx-2 opacity-30">|</span>
+            <Icon icon="lucide:shield-check" className="text-green-500" />
+            <span>Local-first & Private</span>
+          </div>
         </div>
       </section>
 
