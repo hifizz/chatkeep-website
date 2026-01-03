@@ -83,28 +83,28 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative mx-auto max-w-5xl px-6 pt-12 pb-16 text-center md:pt-20 animate-rise overflow-hidden">
         {/* Background Stickers */}
-        <div className="absolute top-10 left-6 animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-forwards opacity-0 md:top-20 md:left-20 lg:left-32">
+        <div className="absolute top-10 left-6 md:top-20 md:left-20 lg:left-32">
           <Gemini.Color
             size={48}
             className="-rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-16 md:w-16"
           />
         </div>
 
-        <div className="absolute right-6 top-16 animate-in fade-in zoom-in duration-1000 delay-500 fill-mode-forwards opacity-0 md:right-20 md:top-24 lg:right-32">
+        <div className="absolute right-6 top-16 md:right-20 md:top-24 lg:right-32">
           <OpenAI
             size={48}
             className="rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-16 md:w-16"
           />
         </div>
 
-        <div className="absolute bottom-40 left-8 animate-in fade-in zoom-in duration-1000 delay-700 fill-mode-forwards opacity-0 md:bottom-48 md:left-24 lg:left-40">
+        <div className="absolute bottom-40 left-8 md:bottom-48 md:left-24 lg:left-40">
           <DeepSeek.Color
             size={56}
             className="rotate-6 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-20 md:w-20"
           />
         </div>
 
-        <div className="absolute bottom-44 right-8 animate-in fade-in zoom-in duration-1000 delay-1000 fill-mode-forwards opacity-0 md:bottom-52 md:right-24 lg:right-40">
+        <div className="absolute bottom-44 right-8 md:bottom-52 md:right-24 lg:right-40">
           <Grok
             size={56}
             className="-rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-20 md:w-20"
