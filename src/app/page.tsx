@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
-import { DeepSeek, Doubao, Gemini, OpenAI, Grok } from "@lobehub/icons";
+import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
 
@@ -65,14 +65,6 @@ const browsers = [
   { name: "Brave", icon: "logos:brave" },
 ];
 
-const aiPlatforms = [
-  { name: "Gemini", icon: Gemini.Color, status: "available" },
-  { name: "ChatGPT", icon: OpenAI, status: "available" },
-  { name: "Deepseek", icon: DeepSeek.Color, status: "available" },
-  { name: "Grok", icon: Grok, status: "available" },
-  { name: "Doubao", icon: Doubao.Color, status: "coming", eta: "Coming in 15 days" },
-];
-
 function InstallChromeButton() {
   return (
     <Link
@@ -89,7 +81,36 @@ export default function HomePage() {
   return (
     <MarketingShell>
       {/* Hero Section */}
-      <section className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 pt-12 pb-16 text-center md:pt-20 animate-rise">
+      <section className="relative mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 pt-12 pb-16 text-center md:pt-20 animate-rise">
+        {/* Background Stickers */}
+        <div className="absolute top-0 left-4 hidden animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-forwards md:block md:-left-12 lg:-left-24">
+          <Gemini.Color
+            size={56}
+            className="-rotate-12 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+          />
+        </div>
+
+        <div className="absolute top-8 right-4 hidden animate-in fade-in zoom-in duration-1000 delay-500 fill-mode-forwards md:block md:-right-12 lg:-right-24">
+          <OpenAI
+            size={56}
+            className="rotate-12 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+          />
+        </div>
+
+        <div className="absolute bottom-32 left-8 hidden animate-in fade-in zoom-in duration-1000 delay-700 fill-mode-forwards md:block md:bottom-20 md:-left-8 lg:-left-16">
+          <DeepSeek.Color
+            size={64}
+            className="rotate-6 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+          />
+        </div>
+
+        <div className="absolute bottom-36 right-10 hidden animate-in fade-in zoom-in duration-1000 delay-1000 fill-mode-forwards md:block md:bottom-24 md:-right-4 lg:-right-12">
+          <Grok
+            size={64}
+            className="-rotate-12 transition-transform hover:scale-110 hover:rotate-0 opacity-80"
+          />
+        </div>
+
         <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
           Chat smarter. <br className="hidden md:block" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500">
@@ -142,49 +163,6 @@ export default function HomePage() {
 
       {/* Hero Image / UI Placeholder */}
       <HeroImage />
-
-      {/* AI Platforms - Moved below Hero Image */}
-      <section className="mx-auto flex w-full max-w-6xl flex-col items-center gap-8 py-12 text-center">
-        <p className="text-sm font-semibold text-neutral-400">
-          Support for your favorite AI models
-        </p>
-        <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
-          {aiPlatforms.map((platform) => (
-            <div
-              key={platform.name}
-              className={`relative transition-all duration-300 ${
-                platform.status === "coming"
-                  ? "opacity-60 grayscale hover:opacity-40"
-                  : "hover:scale-110"
-              }`}
-            >
-              {platform.status === "coming" ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="cursor-help">
-                      <platform.icon size={48} />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{platform.eta}</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="cursor-pointer">
-                      <platform.icon size={48} />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{platform.name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Features Grid */}
       <section className="mx-auto max-w-6xl px-6 py-24">
