@@ -2,8 +2,9 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
-import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 
 const featureCards = [
   {
@@ -65,15 +66,58 @@ const browsers = [
   { name: "Brave", icon: "logos:brave" },
 ];
 
+const aiPlatforms = [
+  { name: "Gemini", icon: Gemini.Color, status: "available" },
+  { name: "ChatGPT", icon: OpenAI, status: "available" },
+  { name: "Deepseek", icon: DeepSeek.Color, status: "available" },
+  { name: "Grok", icon: Grok, status: "available" },
+];
+
 function InstallChromeButton() {
   return (
-    <Link
-      href="/install"
-      className="inline-flex items-center justify-center gap-2 rounded-full bg-white p-3 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105"
-    >
-      <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
-      <span>Install for Chrome</span>
-    </Link>
+    <div className="flex flex-col items-center gap-2">
+      <Link
+        href="/install"
+        className="inline-flex items-center justify-center gap-2 rounded-full bg-white p-3 text-base font-bold text-neutral-950 shadow-lg transition hover:bg-neutral-200 hover:scale-105"
+      >
+        <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
+        <span>Install for Chrome</span>
+      </Link>
+      <HoverCard openDelay={100} closeDelay={100}>
+        <HoverCardTrigger asChild>
+          <button
+            type="button"
+            className="text-xs font-medium text-neutral-500 underline decoration-neutral-700 underline-offset-4 transition hover:text-neutral-300"
+          >
+            Also available on other browsers
+          </button>
+        </HoverCardTrigger>
+        <HoverCardContent
+          className="w-auto border-neutral-800 bg-neutral-900 p-3"
+          side="bottom"
+          align="center"
+        >
+          <div className="flex items-center gap-3">
+            {browsers
+              .filter((b) => b.name !== "Chrome")
+              .map((b) => (
+                <TooltipProvider key={b.name}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-pointer opacity-70 transition hover:scale-110 hover:opacity-100">
+                        <Icon icon={b.icon} width={24} height={24} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{b.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    </div>
   );
 }
 
@@ -81,38 +125,8 @@ export default function HomePage() {
   return (
     <MarketingShell>
       {/* Hero Section */}
-      <section className="relative mx-auto max-w-5xl px-6 pt-12 pb-16 text-center md:pt-20 animate-rise overflow-hidden">
-        {/* Background Stickers */}
-        <div className="absolute top-10 left-6 md:top-20 md:left-20 lg:left-32">
-          <Gemini.Color
-            size={48}
-            className="-rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-16 md:w-16"
-          />
-        </div>
-
-        <div className="absolute right-6 top-16 md:right-20 md:top-24 lg:right-32">
-          <OpenAI
-            size={48}
-            className="rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-16 md:w-16"
-          />
-        </div>
-
-        <div className="absolute bottom-40 left-8 md:bottom-48 md:left-24 lg:left-40">
-          <DeepSeek.Color
-            size={56}
-            className="rotate-6 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-20 md:w-20"
-          />
-        </div>
-
-        <div className="absolute bottom-44 right-8 md:bottom-52 md:right-24 lg:right-40">
-          <Grok
-            size={56}
-            className="-rotate-12 opacity-50 transition-all hover:scale-110 hover:rotate-0 hover:opacity-100 md:h-20 md:w-20"
-          />
-        </div>
-
-        {/* Content Wrapper */}
-        <div className="relative z-10 flex flex-col items-center gap-6">
+      <section className="relative mx-auto max-w-5xl px-6 pt-12 pb-16 text-center md:pt-20 animate-rise overflow-visible">
+        <div className="flex flex-col items-center gap-6">
           <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
             Chat smarter. <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500">
@@ -123,33 +137,39 @@ export default function HomePage() {
             The missing OS for your AI chats. Auto-save, aggregate, highlight, and search your
             conversations locally.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
+
+          <div className="flex flex-wrap items-start justify-center gap-6">
             <InstallChromeButton />
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
+              className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-3.5 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
             >
               Free start
             </Link>
           </div>
 
-          {/* Browser Icons */}
-          <div className="mt-4 flex items-center gap-3">
+          {/* AI Platforms - Replaces Browsers Row */}
+          <div className="mt-8 flex flex-col items-center gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 opacity-70">
-              Available on
+              Works with
             </p>
-            <div className="flex items-center gap-4">
-              {browsers.map((b) => (
-                <Tooltip key={b.name}>
-                  <TooltipTrigger asChild>
-                    <div className="cursor-pointer hover:scale-110 will-change opacity-60 transition-all duration-300 hover:opacity-100">
-                      <Icon icon={b.icon} width={32} height={32} />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{b.name}</p>
-                  </TooltipContent>
-                </Tooltip>
+            <div className="flex items-center gap-6">
+              {aiPlatforms.map((platform) => (
+                <TooltipProvider key={platform.name}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="cursor-pointer transition hover:scale-110">
+                        <platform.icon
+                          size={32}
+                          className={platform.name === "Grok" ? "text-white" : ""}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{platform.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </div>
