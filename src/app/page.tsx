@@ -4,12 +4,7 @@ import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 
 const featureCards = [
   {
@@ -80,42 +75,51 @@ const aiPlatforms = [
 
 function InstallChromeButton() {
   return (
-    <div className="group flex items-center rounded-full bg-white p-1 pl-4 shadow-lg transition hover:bg-neutral-200 hover:scale-105">
+    <div className="group flex items-center rounded-full bg-white p-1.5 shadow-lg transition hover:bg-neutral-200 hover:scale-105">
       <Link
         href="/install"
-        className="flex items-center gap-2 pr-2 text-base font-bold text-neutral-950"
+        className="flex items-center gap-2 rounded-l-full pl-6 pr-4 py-3 text-base font-bold text-neutral-950 hover:bg-neutral-100 transition-colors"
       >
         <Icon icon="logos:chrome" width={24} height={24} aria-hidden="true" className="shrink-0" />
         <span>Install for Chrome</span>
       </Link>
       <div className="mx-1 h-6 w-px bg-neutral-300" />
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-300 hover:text-neutral-900 focus:outline-none">
-          <Icon icon="lucide:chevron-down" width={16} height={16} />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
+      <HoverCard openDelay={0} closeDelay={150}>
+        <HoverCardTrigger asChild>
+          <button
+            type="button"
+            className="flex items-center justify-center rounded-full p-3 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 transition-colors focus:outline-none"
+          >
+            <Icon icon="lucide:chevron-down" width={20} height={20} />
+          </button>
+        </HoverCardTrigger>
+        <HoverCardContent
           align="end"
-          className="w-48 border-neutral-800 bg-neutral-900 text-neutral-200"
+          className="w-56 border-neutral-800 bg-neutral-900 p-2 text-neutral-200 shadow-xl"
         >
-          <div className="px-2 py-1.5 text-xs font-semibold text-neutral-500">Other Browsers</div>
-          {browsers
-            .filter((b) => b.name !== "Chrome")
-            .map((b) => (
-              <DropdownMenuItem
-                key={b.name}
-                className="cursor-pointer gap-2 focus:bg-neutral-800 focus:text-white"
-              >
-                <Icon icon={b.icon} width={16} height={16} />
-                <span>{b.name}</span>
-              </DropdownMenuItem>
-            ))}
-          <div className="my-1 h-px bg-neutral-800" />
-          <DropdownMenuItem disabled className="gap-2 opacity-50">
+          <div className="px-2 py-1.5 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            Other Browsers
+          </div>
+          <div className="space-y-1">
+            {browsers
+              .filter((b) => b.name !== "Chrome")
+              .map((b) => (
+                <div
+                  key={b.name}
+                  className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-neutral-800 hover:text-white transition-colors"
+                >
+                  <Icon icon={b.icon} width={16} height={16} />
+                  <span>{b.name}</span>
+                </div>
+              ))}
+          </div>
+          <div className="my-2 h-px bg-neutral-800" />
+          <div className="flex cursor-not-allowed items-center gap-3 rounded-md px-2 py-2 text-sm opacity-50">
             <Icon icon="lucide:download" width={16} height={16} />
             <span>Manual Install (Soon)</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
     </div>
   );
 }
