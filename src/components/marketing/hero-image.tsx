@@ -32,7 +32,9 @@ export function HeroImage() {
               <div className="w-3 h-3 rounded-full bg-neutral-700"></div>
               <div className="w-3 h-3 rounded-full bg-neutral-700"></div>
             </div>
-            <div className="mx-auto w-1/3 h-6 bg-neutral-800 rounded-md"></div>
+            <div className="mx-auto w-1/3 h-6 bg-neutral-800 rounded-md flex items-center justify-center text-[10px] text-neutral-500 font-mono">
+              https://dev.chatkeep.dev
+            </div>
           </div>
           <div className="absolute top-12 bottom-0 left-0 w-64 border-r border-neutral-800 bg-neutral-900 p-4 space-y-3 hidden md:block">
             <div className="h-4 w-3/4 bg-neutral-800 rounded"></div>
