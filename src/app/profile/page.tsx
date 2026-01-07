@@ -10,19 +10,19 @@ import { getServerSession } from "~/lib/session";
 import { getProfileForUser } from "~/server/billing/profile-service";
 
 const STATUS_LABELS: Record<SubscriptionStatus, string> = {
-  trial: "试用中",
-  active: "已激活",
-  grace: "宽限期",
-  past_due: "逾期",
-  canceled: "已取消",
-  refunded: "已退款",
+  trial: "Trial",
+  active: "Active",
+  grace: "Grace period",
+  past_due: "Past due",
+  canceled: "Canceled",
+  refunded: "Refunded",
 };
 
 const formatDate = (value?: string | null) => {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString("zh-CN", {
+  return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -38,33 +38,35 @@ async function ProfileContent() {
   const profile = await getProfileForUser(session.user.id);
   const plan = profile.plan;
   const planName = plan ? PLAN_NAMES[plan.key] : "Free";
-  const statusLabel = plan?.status ? STATUS_LABELS[plan.status] : "未订阅";
+  const statusLabel = plan?.status ? STATUS_LABELS[plan.status] : "Not subscribed";
 
   return (
-    <section className="mx-auto flex max-w-5xl flex-col gap-8 px-6 pb-16 pt-12">
+    <section className="mx-auto flex max-w-6xl flex-col gap-8 px-6 pb-16 pt-12">
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Profile</p>
-        <h1 className="font-display text-3xl text-white">账号与订阅状态</h1>
-        <p className="text-sm text-neutral-400">查看你的基础信息与当前会员状态。</p>
+        <h1 className="font-display text-3xl text-white">Account and subscription</h1>
+        <p className="text-sm text-neutral-400">Review your profile details and current plan.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-neutral-800 bg-neutral-900/50">
           <CardHeader>
-            <CardTitle className="text-white">账号信息</CardTitle>
-            <CardDescription className="text-neutral-400">用于登录与同步状态展示。</CardDescription>
+            <CardTitle className="text-white">Account</CardTitle>
+            <CardDescription className="text-neutral-400">
+              Primary details used for sign-in and syncing.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-neutral-400">
             <div className="flex items-center justify-between">
-              <span>邮箱</span>
+              <span>Email</span>
               <span className="font-medium text-white">{session.user.email}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>昵称</span>
-              <span className="font-medium text-white">{session.user.name ?? "未设置"}</span>
+              <span>Name</span>
+              <span className="font-medium text-white">{session.user.name ?? "Not set"}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>会员类型</span>
+              <span>Plan</span>
               <span className="font-medium text-white">{profile.isPro ? "Pro" : "Free"}</span>
             </div>
           </CardContent>
@@ -72,30 +74,32 @@ async function ProfileContent() {
 
         <Card className="border-neutral-800 bg-neutral-900/50">
           <CardHeader>
-            <CardTitle className="text-white">订阅状态</CardTitle>
-            <CardDescription className="text-neutral-400">当前订阅计划与周期信息。</CardDescription>
+            <CardTitle className="text-white">Subscription</CardTitle>
+            <CardDescription className="text-neutral-400">
+              Current plan and billing cycle details.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-neutral-400">
             <div className="flex items-center justify-between">
-              <span>方案</span>
+              <span>Plan</span>
               <span className="font-medium text-white">{planName}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>状态</span>
+              <span>Status</span>
               <span className="font-medium text-white">{statusLabel}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>支付渠道</span>
-              <span className="font-medium text-white">{plan?.provider ?? "—"}</span>
+              <span>Provider</span>
+              <span className="font-medium text-white">{plan?.provider ?? "-"}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>到期时间</span>
+              <span>Renews on</span>
               <span className="font-medium text-white">{formatDate(plan?.currentPeriodEnd)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>到期后取消</span>
+              <span>Cancel at period end</span>
               <span className="font-medium text-white">
-                {plan?.cancelAtPeriodEnd ? "是" : "否"}
+                {plan?.cancelAtPeriodEnd ? "Yes" : "No"}
               </span>
             </div>
           </CardContent>
@@ -104,14 +108,14 @@ async function ProfileContent() {
 
       <div className="flex flex-wrap gap-3">
         <Button asChild className="bg-white text-neutral-950 hover:bg-neutral-200">
-          <Link href="/pricing">管理订阅</Link>
+          <Link href="/pricing">Manage subscription</Link>
         </Button>
         <Button
           asChild
           variant="outline"
           className="border-neutral-800 text-white hover:bg-neutral-800 hover:text-white"
         >
-          <Link href="/logout">退出登录</Link>
+          <Link href="/logout">Sign out</Link>
         </Button>
       </div>
     </section>
@@ -122,7 +126,7 @@ export default function ProfilePage() {
   return (
     <MarketingShell>
       <Suspense
-        fallback={<div className="px-6 pb-16 pt-12 text-sm text-muted-foreground">正在加载…</div>}
+        fallback={<div className="px-6 pb-16 pt-12 text-sm text-muted-foreground">Loading...</div>}
       >
         <ProfileContent />
       </Suspense>

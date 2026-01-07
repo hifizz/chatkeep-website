@@ -6,20 +6,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 export default function BillingSuccessPage() {
   return (
     <MarketingShell>
-      <section className="mx-auto flex max-w-4xl flex-col gap-8 px-6 pb-16 pt-12">
+      <section className="mx-auto flex max-w-6xl flex-col gap-8 px-6 pb-16 pt-12">
         <Card className="border-[color:var(--marketing-border)] bg-white">
           <CardHeader>
-            <CardTitle>支付成功</CardTitle>
-            <CardDescription>我们已收到你的付款，会员状态将在短时间内更新。</CardDescription>
+            <CardTitle>Payment successful</CardTitle>
+            <CardDescription>Your subscription status will update shortly.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-[color:var(--marketing-muted)]">
-            <p>你可以前往用户中心查看订阅状态与会员信息。</p>
+            <p>You can review your subscription status and plan details in your profile.</p>
             <div className="flex flex-wrap gap-3">
               <Button asChild>
-                <Link href="/profile">前往用户中心</Link>
+                <Link href="/profile">Go to profile</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/pricing">返回定价页</Link>
+                <Link href="/pricing">Back to pricing</Link>
               </Button>
             </div>
           </CardContent>
