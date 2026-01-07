@@ -3,7 +3,7 @@ import { MarketingShell } from "~/components/marketing/marketing-shell";
 export default function PrivacyPage() {
   return (
     <MarketingShell>
-      <div className="mx-auto max-w-3xl px-6 py-12 md:py-20">
+      <div className="mx-auto max-w-6xl px-6 py-12 md:py-20">
         <h1 className="mb-2 text-4xl font-bold tracking-tight text-white">Privacy Policy</h1>
         <p className="mb-10 text-xl text-neutral-400">Local-first, clear, and transparent.</p>
 

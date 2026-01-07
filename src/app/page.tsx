@@ -125,7 +125,7 @@ export default function HomePage() {
   return (
     <MarketingShell>
       {/* Hero Section */}
-      <section className="relative mx-auto max-w-5xl px-6 pt-12 pb-16 text-center animate-rise overflow-visible md:pt-20">
+      <section className="relative mx-auto max-w-6xl px-6 pt-12 pb-16 text-center animate-rise overflow-visible md:pt-20">
         <div className="flex flex-col items-center gap-6">
           <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
             Chat smarter. <br className="hidden md:block" />
@@ -267,7 +267,7 @@ export default function HomePage() {
 
       {/* Bottom CTA */}
       <section className="relative overflow-hidden bg-neutral-900 py-24 text-center text-white border-t border-neutral-800">
-        <div className="relative z-10 mx-auto max-w-4xl px-6">
+        <div className="relative z-10 mx-auto max-w-6xl px-6">
           <h2 className="mb-6 font-display text-4xl font-bold md:text-5xl">
             Ready to reclaim your chats?
           </h2>
