@@ -82,7 +82,12 @@ describe("rpc sync endpoints", () => {
   });
 
   it("handles push requests", async () => {
-    const response = { serverTime: "2025-01-01T00:00:00.000Z", accepted: 1 };
+    const response = {
+      serverTime: "2025-01-01T00:00:00.000Z",
+      accepted: 1,
+      skipped: 0,
+      rejected: 0,
+    };
     vi.mocked(pushSyncRecords).mockResolvedValue(response);
 
     const res = await postJson("/api/rpc/sync/push", {
