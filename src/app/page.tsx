@@ -1,39 +1,51 @@
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { cn } from "~/lib/utils";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
+import { FeatureImageDialog } from "~/components/marketing/feature-image-dialog";
 
-const featureCards = [
+const features = [
   {
-    title: "Save anything from anywhere",
+    title: "Pro-grade Markdown exports",
     description:
-      "One click to save chats from Gemini. ChatGPT and Deepseek coming soon. Your knowledge base grows automatically.",
-    icon: "lucide:save",
-    color: "bg-blue-100 text-blue-600",
+      "Your data stays yours. Export chats to standard Markdown with code and formatting intact, then move them into Notion or Obsidian.",
+    image: "/fa-export-markdown.png",
   },
   {
-    title: "Your insights, highlighted",
+    title: "Automatic local chat history saving",
     description:
-      "Select text to leave memos. Don't just save the chat, keep the context and your thoughts attached to it.",
-    icon: "lucide:highlighter",
-    color: "bg-yellow-100 text-yellow-600",
+      "Sync chats from Gemini, ChatGPT, DeepSeek, and more in one click. No more scattered history; manage your AI knowledge base in one place.",
+    image: "/fa-sync-save.png",
+    note: "Supported platforms: Gemini, ChatGPT, DeepSeek, Grok",
   },
   {
-    title: "Search is just the beginning",
+    title: "Highlights and context memos",
     description:
-      "Find any conversation in milliseconds. Jump back to the exact moment and restore context instantly.",
-    icon: "lucide:search",
-    color: "bg-purple-100 text-purple-600",
+      "Select text to add highlights and memos. Capture not just the conversation, but the thinking and context behind it.",
+    image: "/fa-memos.png",
   },
   {
-    title: "Everything connected locally",
+    title: "Instant full-text search",
     description:
-      "Export to Markdown, navigate via TOC minimap, and own your data. Local-first by default.",
-    icon: "lucide:link",
-    color: "bg-green-100 text-green-600",
+      "Powered by a local high-performance search engine. Find yesterday's insight or last month's snippet in milliseconds with fuzzy search.",
+    image: "/fa-search.png",
+  },
+  {
+    title: "Mermaid diagram rendering",
+    description:
+      "Fill the gap: ChatKeep adds Mermaid diagram rendering to Gemini and ChatGPT so complex logic is visual at a glance.",
+    image: "/fa-mermaid.png",
+    note: "Note: Mermaid rendering is only needed for Gemini and ChatGPT (other platforms like DeepSeek already support it natively).",
+  },
+  {
+    title: "Gemini Deep Research export",
+    description:
+      "Export Gemini Deep Research reports into your local archive, so long-form findings stay reusable, searchable, and easy to reference later.",
+    image: "/fa-export-dr.png",
   },
 ];
 
@@ -69,7 +81,7 @@ const browsers = [
 const aiPlatforms = [
   { name: "Gemini", icon: Gemini.Color, status: "available" },
   { name: "ChatGPT", icon: OpenAI, status: "available" },
-  { name: "Deepseek", icon: DeepSeek.Color, status: "available" },
+  { name: "DeepSeek", icon: DeepSeek.Color, status: "available" },
   { name: "Grok", icon: Grok, status: "available" },
 ];
 
@@ -185,37 +197,58 @@ export default function HomePage() {
       </section>
 
       {/* Hero Image / UI Placeholder */}
-      <HeroImage />
+      <HeroImage src="/fa-main.png" alt="ChatKeep product screenshot" />
 
       {/* Features Grid */}
-      <section id="features" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="mb-16 text-center">
-          <h2 className="font-display text-4xl font-bold text-white">
-            Everything you need to manage context.
+      <section id="features" className="mx-auto max-w-6xl px-6 py-12 md:py-24">
+        <div className="mb-16 md:mb-24 text-center">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white">
+            The missing toolkit for AI chatbots
           </h2>
-          <p className="mt-4 text-lg text-neutral-400">
-            ChatKeep bridges the gap between fleeting chats and permanent knowledge.
+          <p className="mt-4 text-base md:text-lg text-neutral-400">
+            The missing toolkit for turning AI chats into lasting knowledge.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          {featureCards.map((feature) => (
-            <div
-              key={feature.title}
-              className="group relative overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 transition hover:border-neutral-700 hover:bg-neutral-900"
-            >
+        <div className="flex flex-col gap-16 md:gap-32">
+          {features.map((feature, i) => {
+            const isEven = i % 2 === 0;
+            return (
               <div
-                className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color.replace(
-                  "bg-",
-                  "bg-opacity-20 bg-",
-                )}`}
+                key={feature.title}
+                className="flex flex-col md:flex-row items-center gap-8 md:gap-24"
               >
-                <Icon icon={feature.icon} width={28} height={28} />
+                {/* Image Section */}
+                <div className={cn("flex-1 w-full", isEven ? "md:order-1" : "md:order-2")}>
+                  <div className="relative">
+                    <FeatureImageDialog
+                      image={feature.image}
+                      title={feature.title}
+                      description={feature.description}
+                    />
+                  </div>
+                </div>
+
+                {/* Text Section */}
+                <div
+                  className={cn(
+                    "flex-1 space-y-4 md:space-y-6",
+                    isEven ? "md:order-2" : "md:order-1",
+                  )}
+                >
+                  <h3 className="text-2xl md:text-3xl font-bold text-white">{feature.title}</h3>
+                  <p className="text-base md:text-lg text-neutral-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+                  {feature.note && (
+                    <div className="rounded-xl bg-neutral-900/80 border border-neutral-800 p-4 text-sm text-neutral-500">
+                      {feature.note}
+                    </div>
+                  )}
+                </div>
               </div>
-              <h3 className="mb-3 text-2xl font-bold text-white">{feature.title}</h3>
-              <p className="text-base text-neutral-400 leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 

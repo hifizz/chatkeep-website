@@ -17,7 +17,11 @@ export const metadata: Metadata = {
     "export ai chat to markdown",
     "local-first chat history",
   ],
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    { rel: "icon", url: "/logo.png", type: "image/png" },
+    { rel: "shortcut icon", url: "/logo.png", type: "image/png" },
+    { rel: "apple-touch-icon", url: "/logo.png" },
+  ],
 };
 
 const geist = Geist({

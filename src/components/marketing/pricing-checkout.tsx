@@ -58,40 +58,61 @@ export function PricingCheckoutGrid() {
         {PRICING_PLANS.map((plan) => (
           <div
             key={plan.key}
-            className="flex h-full flex-col justify-between rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 shadow-sm transition hover:bg-neutral-900"
+            className={`relative flex h-full flex-col justify-between rounded-3xl border p-6 shadow-sm transition hover:bg-neutral-900 ${
+              plan.key === "monthly"
+                ? "border-emerald-500/60 bg-emerald-500/5"
+                : "border-neutral-800 bg-neutral-900/50"
+            }`}
           >
+            {plan.key === "monthly" ? (
+              <div className="absolute left-6 top-0 z-10 -translate-y-1/2 rounded-full border border-emerald-500 bg-emerald-950 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-100 shadow-sm">
+                Most popular
+              </div>
+            ) : null}
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-semibold text-neutral-400">{plan.name}</p>
                 <p className="mt-2 text-3xl font-semibold text-white">{plan.priceLabel}</p>
+                {plan.key === "annual" ? (
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                    Get 2 months free
+                  </p>
+                ) : null}
                 <p className="mt-2 text-sm text-neutral-400">{plan.summary}</p>
               </div>
 
               <ul className="space-y-3 text-sm text-neutral-400">
-                {plan.features.map((feature) => (
-                  <li key={feature.label} className="flex items-start gap-2">
-                    <span
-                      className={`mt-1 h-2.5 w-2.5 rounded-full ${
-                        feature.status === "available" ? "bg-white" : "border border-neutral-700"
-                      }`}
-                    />
-                    <span>
-                      {feature.label}
-                      {feature.status === "coming" && (
-                        <span className="ml-2 rounded-full border border-neutral-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-neutral-500">
-                          Coming soon
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
+                {plan.features.map((feature) => {
+                  const isHighlight = "highlight" in feature && feature.highlight;
+                  return (
+                    <li key={feature.label} className="flex items-start gap-2">
+                      <span
+                        className={`mt-1 h-2.5 w-2.5 rounded-full ${
+                          feature.status === "available" ? "bg-white" : "border border-neutral-700"
+                        }`}
+                      />
+                      <span
+                        className={
+                          isHighlight ? "font-semibold text-emerald-200" : "text-neutral-400"
+                        }
+                      >
+                        {feature.label}
+                        {feature.status === "coming" && (
+                          <span className="ml-2 rounded-full border border-neutral-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-neutral-500">
+                            Coming soon
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
             {plan.key === "free" ? (
               <Link
                 href="/install"
-                className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 hover:cursor-pointer"
               >
                 {plan.cta}
               </Link>
@@ -100,7 +121,7 @@ export function PricingCheckoutGrid() {
                 type="button"
                 onClick={() => handleCheckout(plan.key)}
                 disabled={loadingPlan === plan.key}
-                className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingPlan === plan.key ? "Redirecting..." : plan.cta}
               </button>
