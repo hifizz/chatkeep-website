@@ -12,39 +12,39 @@ const features = [
   {
     title: "Pro-grade Markdown exports",
     description:
-      "Your data stays yours. Export chats to standard Markdown with code and formatting intact, then move them into Notion or Obsidian.",
+      "Your data remains yours. Export chats as clean Markdown with code blocks and formatting intact, then move them into Notion or Obsidian.",
     image: "/fa-export-markdown.png",
   },
   {
-    title: "Automatic local chat history saving",
+    title: "Cross-platform chat aggregation",
     description:
-      "Sync chats from Gemini, ChatGPT, DeepSeek, and more in one click. No more scattered history; manage your AI knowledge base in one place.",
+      "Aggregate chats from Gemini, ChatGPT, DeepSeek, and Grok with one click. Keep your AI conversation history in one searchable place.",
     image: "/fa-sync-save.png",
     note: "Supported platforms: Gemini, ChatGPT, DeepSeek, Grok",
   },
   {
     title: "Highlights and context memos",
     description:
-      "Select text to add highlights and memos. Capture not just the conversation, but the thinking and context behind it.",
+      "Highlight text and add notes as you read. Save the context and reasoning behind key answers.",
     image: "/fa-memos.png",
   },
   {
     title: "Instant full-text search",
     description:
-      "Powered by a local high-performance search engine. Find yesterday's insight or last month's snippet in milliseconds with fuzzy search.",
+      "Built on a fast local search index. Find yesterday's insight or last month's snippet in milliseconds.",
     image: "/fa-search.png",
   },
   {
     title: "Mermaid diagram rendering",
     description:
-      "Fill the gap: ChatKeep adds Mermaid diagram rendering to Gemini and ChatGPT so complex logic is visual at a glance.",
+      "ChatKeep renders Mermaid diagrams in Gemini and ChatGPT, so complex logic is easier to understand at a glance.",
     image: "/fa-mermaid.png",
     note: "Note: Mermaid rendering is only needed for Gemini and ChatGPT (other platforms like DeepSeek already support it natively).",
   },
   {
     title: "Gemini Deep Research export",
     description:
-      "Export Gemini Deep Research reports into your local archive, so long-form findings stay reusable, searchable, and easy to reference later.",
+      "Export Gemini Deep Research reports to your local archive, so long reports stay searchable and easy to reuse.",
     image: "/fa-export-dr.png",
   },
 ];
@@ -53,19 +53,19 @@ const useCases = [
   {
     role: "For Developers",
     description:
-      "Save code snippets, debug logs, and architecture discussions. Search back when you hit the same error months later.",
+      "Save snippets, logs, and architecture decisions. Pull them up when the same issue shows up months later.",
     icon: "lucide:code-2",
   },
   {
     role: "For Researchers",
     description:
-      "Aggregate summaries, citations, and brainstorming sessions. Export to Markdown to weave into your papers.",
+      "Collect summaries, citations, and brainstorming sessions. Export to Markdown when you're ready to write.",
     icon: "lucide:flask-conical",
   },
   {
     role: "For Students",
     description:
-      "Keep track of explanations, study guides, and language practice. Review highlighted memos before exams.",
+      "Keep explanations, study guides, and language practice in one place. Review highlights and notes before exams.",
     icon: "lucide:graduation-cap",
   },
 ];
@@ -146,8 +146,8 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="max-w-2xl text-xl text-neutral-400 md:text-2xl">
-            The missing OS for your AI chats. Auto-save, aggregate, highlight, and search your
-            conversations locally.
+            The missing OS for your AI chats. Auto-save, aggregate, organize, and search everything
+            in one place.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -156,7 +156,7 @@ export default function HomePage() {
               href="#features"
               className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
             >
-              Killer features
+              See features
             </Link>
           </div>
 
@@ -203,10 +203,10 @@ export default function HomePage() {
       <section id="features" className="mx-auto max-w-6xl px-6 py-12 md:py-24">
         <div className="mb-16 md:mb-24 text-center">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white">
-            The missing toolkit for AI chatbots
+            Everything you need to turn AI chats into usable knowledge
           </h2>
           <p className="mt-4 text-base md:text-lg text-neutral-400">
-            The missing toolkit for turning AI chats into lasting knowledge.
+            Aggregate, organize, and find important conversations without leaving your browser.
           </p>
         </div>
 
@@ -283,21 +283,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonial / Trust Placeholder */}
-      <section className="mx-auto max-w-6xl px-6 py-24 text-center">
-        <p className="mb-8 text-sm font-semibold uppercase tracking-widest text-neutral-600">
-          Trusted by early adopters
-        </p>
-        <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 opacity-30 grayscale invert">
-          {/* Logo placeholders using text for now */}
-          <span className="text-xl font-bold text-white">Acme Corp</span>
-          <span className="text-xl font-bold text-white">GlobalTech</span>
-          <span className="text-xl font-bold text-white">Nebula AI</span>
-          <span className="text-xl font-bold text-white">FoxRun</span>
-          <span className="text-xl font-bold text-white">Circle</span>
-        </div>
-      </section>
-
       {/* Bottom CTA */}
       <section className="relative overflow-hidden bg-neutral-900 py-24 text-center text-white border-t border-neutral-800">
         <div className="relative z-10 mx-auto max-w-6xl px-6">
@@ -305,7 +290,7 @@ export default function HomePage() {
             Ready to reclaim your chats?
           </h2>
           <p className="mb-10 text-lg text-neutral-400">
-            Join thousands of users who are building their personal AI knowledge base today.
+            Turn everyday chats into a personal AI knowledge base.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
@@ -316,7 +301,9 @@ export default function HomePage() {
               <span>Install for Chrome</span>
             </Link>
           </div>
-          <p className="mt-8 text-sm text-neutral-600">No credit card required for free plan.</p>
+          <p className="mt-8 text-sm text-neutral-600">
+            No credit card required for the free plan.
+          </p>
         </div>
 
         {/* Decorative background elements */}

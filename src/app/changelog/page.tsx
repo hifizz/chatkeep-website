@@ -2,14 +2,16 @@ import { MarketingShell } from "~/components/marketing/marketing-shell";
 
 const updates = [
   {
-    date: "Today",
-    title: "Marketing site refresh",
-    description: "Introduced the new ChatKeep positioning and pricing structure.",
+    date: "March 22, 2026",
+    title: "Messaging and docs consistency update",
+    description:
+      "Updated website copy so platform support is consistently listed as Gemini, ChatGPT, DeepSeek, and Grok.",
   },
   {
-    date: "Soon",
-    title: "Platform expansion",
-    description: "ChatGPT and Deepseek support are next on the roadmap.",
+    date: "Q1 2026 target",
+    title: "Documentation expansion",
+    description:
+      "Added dedicated docs pages for compatibility, current limitations, and roadmap updates.",
   },
 ];
 

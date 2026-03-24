@@ -9,6 +9,7 @@ const navItems = [
   { label: "Pricing", href: "/pricing" },
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
+  { label: "Docs", href: "/docs" },
   { label: "Changelog", href: "/changelog" },
 ];
 
@@ -85,6 +86,10 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
 
               <Link href="/changelog" className="hover:text-white">
                 Changelog
+              </Link>
+
+              <Link href="/docs" className="hover:text-white">
+                Docs
               </Link>
             </div>
 

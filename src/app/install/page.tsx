@@ -7,12 +7,13 @@ const steps = [
     description: "Install the extension and pin it to your toolbar for quick access.",
   },
   {
-    title: "Open Gemini",
-    description: "ChatKeep starts saving your conversations locally right away.",
+    title: "Open your chat platform",
+    description:
+      "Use Gemini, ChatGPT, DeepSeek, or Grok, and ChatKeep will save each conversation locally.",
   },
   {
     title: "Organize as you chat",
-    description: "Highlight, memo, and search across your saved chats as features roll out.",
+    description: "Highlight text, add notes, and search across everything you've saved.",
   },
 ];
 
@@ -26,8 +27,8 @@ export default function InstallPage() {
           </p>
           <h1 className="font-display text-4xl text-white">Install ChatKeep in under a minute.</h1>
           <p className="text-sm text-neutral-400">
-            ChatKeep runs locally in your browser. Gemini is supported now, with ChatGPT and
-            Deepseek coming soon.
+            ChatKeep runs locally in your browser and currently supports Gemini, ChatGPT, DeepSeek,
+            and Grok.
           </p>
         </div>
 
@@ -49,8 +50,8 @@ export default function InstallPage() {
         <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6">
           <h2 className="text-lg font-semibold text-white">Permissions</h2>
           <p className="mt-2 text-sm text-neutral-400">
-            ChatKeep only requests the minimum permissions needed to read and save your chat
-            content. Your data stays on your device.
+            ChatKeep requests only the permissions needed to read and save chat content. Your data
+            stays on your device.
           </p>
         </div>
 

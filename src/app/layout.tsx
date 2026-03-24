@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 export const metadata: Metadata = {
   title: "ChatKeep – The Missing OS for AI Chats",
   description:
-    "Aggregate, highlight, search, and export your AI conversations locally. Gemini supported now; ChatGPT & Deepseek coming soon.",
+    "Aggregate, highlight, search, and export AI conversations locally. Supports Gemini, ChatGPT, DeepSeek, and Grok.",
   keywords: [
     "ai chat manager",
     "save gemini chats",
