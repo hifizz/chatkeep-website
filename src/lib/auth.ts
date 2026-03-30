@@ -5,6 +5,7 @@ import { db } from "~/server/db";
 import { env } from "~/env";
 import { sendEmail } from "./email";
 import { syncCreemRefundEvent, syncCreemSubscriptionEvent } from "~/server/billing/creem-sync";
+import { getAllowedOrigins, isExtensionOrigin } from "./allowed-origins";
 
 const ResetPasswordTemplate = ({ url }: { url: string }) => `
   <div>
@@ -34,6 +35,23 @@ const creemPlugin = env.CREEM_API_KEY
     })
   : null;
 
+function getTrustedOrigins(): string[] {
+  const baseOrigin = new URL(env.BETTER_AUTH_URL).origin;
+  const allowedOrigins = getAllowedOrigins(env.AUTH_ALLOWED_ORIGINS, env.NODE_ENV);
+  return Array.from(new Set([baseOrigin, ...allowedOrigins]));
+}
+
+const trustedOrigins = getTrustedOrigins();
+const useSecureCookies = env.BETTER_AUTH_URL.startsWith("https://");
+const hasExtensionOrigin = trustedOrigins.some(isExtensionOrigin);
+const defaultCookieAttributes =
+  useSecureCookies && hasExtensionOrigin
+    ? {
+        sameSite: "none" as const,
+        secure: true,
+      }
+    : undefined;
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -50,5 +68,10 @@ export const auth = betterAuth({
   },
   secret: env.BETTER_AUTH_SECRET,
   baseUrl: env.BETTER_AUTH_URL,
+  trustedOrigins,
+  advanced: {
+    useSecureCookies,
+    ...(defaultCookieAttributes ? { defaultCookieAttributes } : {}),
+  },
   plugins: creemPlugin ? [creemPlugin] : [],
 });

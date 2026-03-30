@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 export const metadata: Metadata = {
   title: "ChatKeep – The Missing OS for AI Chats",
   description:
-    "Aggregate, highlight, search, and export your AI conversations locally. Gemini supported now; ChatGPT & Deepseek coming soon.",
+    "Aggregate, highlight, search, and export AI conversations locally. Supports Gemini, ChatGPT, DeepSeek, and Grok.",
   keywords: [
     "ai chat manager",
     "save gemini chats",
@@ -17,7 +17,11 @@ export const metadata: Metadata = {
     "export ai chat to markdown",
     "local-first chat history",
   ],
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    { rel: "icon", url: "/logo.png", type: "image/png" },
+    { rel: "shortcut icon", url: "/logo.png", type: "image/png" },
+    { rel: "apple-touch-icon", url: "/logo.png" },
+  ],
 };
 
 const geist = Geist({

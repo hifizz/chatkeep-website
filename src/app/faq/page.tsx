@@ -4,23 +4,29 @@ const faqs = [
   {
     question: "What is ChatKeep?",
     answer:
-      "ChatKeep is the missing OS for AI chats. It saves conversations locally and adds highlight, search, TOC, and export.",
+      "ChatKeep is the missing OS for AI chats. It helps you aggregate, organize, search, and export conversations across platforms.",
   },
   {
     question: "Is ChatKeep safe?",
-    answer: "Yes. It is local-first. Your data stays on your device.",
+    answer: "Yes. ChatKeep is local-first, and your chat content stays on your device.",
   },
   {
     question: "Which platforms are supported?",
-    answer: "Gemini is supported now. ChatGPT and Deepseek are coming soon.",
+    answer: "ChatKeep currently supports Gemini, ChatGPT, DeepSeek, and Grok.",
   },
   {
     question: "Can I export conversations?",
-    answer: "Yes. You can export to Markdown now. PDF/HTML/JSON are coming soon.",
+    answer:
+      "Yes. Markdown export is available now. PDF, HTML, and JSON exports are on the roadmap.",
   },
   {
     question: "Does ChatKeep provide cloud sync?",
     answer: "Not yet. Cloud sync is planned for paid plans.",
+  },
+  {
+    question: "Where can I check compatibility, limitations, and roadmap updates?",
+    answer:
+      "Visit the docs pages for compatibility details, current limitations, and roadmap targets.",
   },
 ];
 
@@ -33,9 +39,7 @@ export default function FAQPage() {
           <h1 className="font-display text-4xl text-white">
             Answers to the most common questions.
           </h1>
-          <p className="text-sm text-neutral-400">
-            These answers are designed for clarity and direct responses.
-          </p>
+          <p className="text-sm text-neutral-400">Quick, direct answers to help you get started.</p>
         </div>
 
         <div className="space-y-4">

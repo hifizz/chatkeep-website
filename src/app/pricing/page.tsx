@@ -22,8 +22,8 @@ export default function PricingPage() {
 
         <div className="rounded-3xl border border-neutral-800 bg-neutral-900/30 p-6 text-sm text-neutral-400">
           <p>
-            Local-first by default. Cloud sync and share links will be opt-in features for paid
-            plans once available.
+            Local-first by default. Cloud sync is available on paid plans. Share links will be an
+            opt-in feature once available.
           </p>
         </div>
       </section>

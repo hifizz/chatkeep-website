@@ -3,6 +3,7 @@
 
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   index,
   primaryKey,
   pgTableCreator,
@@ -133,11 +134,13 @@ export const syncRecord = createTable(
     payload: text("payload").notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    serverOrder: bigint("server_order", { mode: "number" }).notNull().default(0),
   }),
   (t) => [
     primaryKey({ columns: [t.userId, t.recordType, t.recordId] }),
     index("sync_record_user_updated_at_idx").on(t.userId, t.updatedAt),
     index("sync_record_user_deleted_at_idx").on(t.userId, t.deletedAt),
+    index("sync_record_user_server_order_idx").on(t.userId, t.serverOrder),
   ],
 );
 

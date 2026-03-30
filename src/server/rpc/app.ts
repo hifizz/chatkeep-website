@@ -65,6 +65,8 @@ const SyncRecordSchema = z.object({
   payload: z.string(),
   updatedAt: z.string().datetime(),
   deletedAt: z.string().datetime().optional(),
+  // push 可选透传，服务端以自身分配为准。
+  serverOrder: z.number().int().nonnegative().optional(),
 });
 
 const SyncPullSchema = z.object({
@@ -125,6 +127,11 @@ const routes = app
     const session = c.get("session");
     const input = c.req.valid("json") as SyncPushRequestDTO;
 
+    // push 语义约定：
+    // - accepted: 实际写入条数
+    // - skipped: 合法 no-op 条数（幂等冲突）
+    // - rejected: 被拒绝处理条数
+    // 强约束：accepted + skipped + rejected === input.records.length
     const response = await pushSyncRecords({
       userId: session.user.id,
       records: input.records,

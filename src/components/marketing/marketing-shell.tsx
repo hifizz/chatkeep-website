@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MarketingMobileMenu } from "~/components/marketing/marketing-mobile-menu";
 import { MarketingHeaderCta } from "~/components/marketing/marketing-header-cta";
 
@@ -8,6 +9,7 @@ const navItems = [
   { label: "Pricing", href: "/pricing" },
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
+  { label: "Docs", href: "/docs" },
   { label: "Changelog", href: "/changelog" },
 ];
 
@@ -19,9 +21,13 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-neutral-950/80 backdrop-blur-md transition-all duration-200 hover:border-white/10">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2 transition hover:opacity-80">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-neutral-950 shadow-sm shadow-white/10">
-              <span className="text-lg font-bold">CK</span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="ChatKeep logo"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-xl object-cover shadow-sm shadow-white/10"
+            />
 
             <span className="text-xl font-bold tracking-tight text-white">ChatKeep</span>
           </Link>
@@ -50,7 +56,13 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 text-sm text-neutral-400 md:flex-row md:justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 font-bold text-white">
-              <div className="h-6 w-6 rounded-md bg-white"></div>
+              <Image
+                src="/logo.png"
+                alt="ChatKeep logo"
+                width={24}
+                height={24}
+                className="h-6 w-6 rounded-md object-cover"
+              />
               ChatKeep
             </div>
 
@@ -74,6 +86,10 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
 
               <Link href="/changelog" className="hover:text-white">
                 Changelog
+              </Link>
+
+              <Link href="/docs" className="hover:text-white">
+                Docs
               </Link>
             </div>
 

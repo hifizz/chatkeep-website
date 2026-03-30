@@ -1,39 +1,51 @@
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { cn } from "~/lib/utils";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
+import { FeatureImageDialog } from "~/components/marketing/feature-image-dialog";
 
-const featureCards = [
+const features = [
   {
-    title: "Save anything from anywhere",
+    title: "Pro-grade Markdown exports",
     description:
-      "One click to save chats from Gemini. ChatGPT and Deepseek coming soon. Your knowledge base grows automatically.",
-    icon: "lucide:save",
-    color: "bg-blue-100 text-blue-600",
+      "Your data remains yours. Export chats as clean Markdown with code blocks and formatting intact, then move them into Notion or Obsidian.",
+    image: "/fa-export-markdown.png",
   },
   {
-    title: "Your insights, highlighted",
+    title: "Cross-platform chat aggregation",
     description:
-      "Select text to leave memos. Don't just save the chat, keep the context and your thoughts attached to it.",
-    icon: "lucide:highlighter",
-    color: "bg-yellow-100 text-yellow-600",
+      "Aggregate chats from Gemini, ChatGPT, DeepSeek, and Grok with one click. Keep your AI conversation history in one searchable place.",
+    image: "/fa-sync-save.png",
+    note: "Supported platforms: Gemini, ChatGPT, DeepSeek, Grok",
   },
   {
-    title: "Search is just the beginning",
+    title: "Highlights and context memos",
     description:
-      "Find any conversation in milliseconds. Jump back to the exact moment and restore context instantly.",
-    icon: "lucide:search",
-    color: "bg-purple-100 text-purple-600",
+      "Highlight text and add notes as you read. Save the context and reasoning behind key answers.",
+    image: "/fa-memos.png",
   },
   {
-    title: "Everything connected locally",
+    title: "Instant full-text search",
     description:
-      "Export to Markdown, navigate via TOC minimap, and own your data. Local-first by default.",
-    icon: "lucide:link",
-    color: "bg-green-100 text-green-600",
+      "Built on a fast local search index. Find yesterday's insight or last month's snippet in milliseconds.",
+    image: "/fa-search.png",
+  },
+  {
+    title: "Mermaid diagram rendering",
+    description:
+      "ChatKeep renders Mermaid diagrams in Gemini and ChatGPT, so complex logic is easier to understand at a glance.",
+    image: "/fa-mermaid.png",
+    note: "Note: Mermaid rendering is only needed for Gemini and ChatGPT (other platforms like DeepSeek already support it natively).",
+  },
+  {
+    title: "Gemini Deep Research export",
+    description:
+      "Export Gemini Deep Research reports to your local archive, so long reports stay searchable and easy to reuse.",
+    image: "/fa-export-dr.png",
   },
 ];
 
@@ -41,19 +53,19 @@ const useCases = [
   {
     role: "For Developers",
     description:
-      "Save code snippets, debug logs, and architecture discussions. Search back when you hit the same error months later.",
+      "Save snippets, logs, and architecture decisions. Pull them up when the same issue shows up months later.",
     icon: "lucide:code-2",
   },
   {
     role: "For Researchers",
     description:
-      "Aggregate summaries, citations, and brainstorming sessions. Export to Markdown to weave into your papers.",
+      "Collect summaries, citations, and brainstorming sessions. Export to Markdown when you're ready to write.",
     icon: "lucide:flask-conical",
   },
   {
     role: "For Students",
     description:
-      "Keep track of explanations, study guides, and language practice. Review highlighted memos before exams.",
+      "Keep explanations, study guides, and language practice in one place. Review highlights and notes before exams.",
     icon: "lucide:graduation-cap",
   },
 ];
@@ -69,7 +81,7 @@ const browsers = [
 const aiPlatforms = [
   { name: "Gemini", icon: Gemini.Color, status: "available" },
   { name: "ChatGPT", icon: OpenAI, status: "available" },
-  { name: "Deepseek", icon: DeepSeek.Color, status: "available" },
+  { name: "DeepSeek", icon: DeepSeek.Color, status: "available" },
   { name: "Grok", icon: Grok, status: "available" },
 ];
 
@@ -134,8 +146,8 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="max-w-2xl text-xl text-neutral-400 md:text-2xl">
-            The missing OS for your AI chats. Auto-save, aggregate, highlight, and search your
-            conversations locally.
+            The missing OS for your AI chats. Auto-save, aggregate, organize, highlight, and search
+            everything in one place.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -144,7 +156,7 @@ export default function HomePage() {
               href="#features"
               className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
             >
-              Killer features
+              See features
             </Link>
           </div>
 
@@ -185,37 +197,58 @@ export default function HomePage() {
       </section>
 
       {/* Hero Image / UI Placeholder */}
-      <HeroImage />
+      <HeroImage src="/fa-main.png" alt="ChatKeep product screenshot" />
 
       {/* Features Grid */}
-      <section id="features" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="mb-16 text-center">
-          <h2 className="font-display text-4xl font-bold text-white">
-            Everything you need to manage context.
+      <section id="features" className="mx-auto max-w-6xl px-6 py-12 md:py-24">
+        <div className="mb-16 md:mb-24 text-center">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white">
+            Everything you need to turn AI chats into usable knowledge
           </h2>
-          <p className="mt-4 text-lg text-neutral-400">
-            ChatKeep bridges the gap between fleeting chats and permanent knowledge.
+          <p className="mt-4 text-base md:text-lg text-neutral-400">
+            Aggregate, organize, and find important conversations without leaving your browser.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          {featureCards.map((feature) => (
-            <div
-              key={feature.title}
-              className="group relative overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900/50 p-8 transition hover:border-neutral-700 hover:bg-neutral-900"
-            >
+        <div className="flex flex-col gap-16 md:gap-32">
+          {features.map((feature, i) => {
+            const isEven = i % 2 === 0;
+            return (
               <div
-                className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color.replace(
-                  "bg-",
-                  "bg-opacity-20 bg-",
-                )}`}
+                key={feature.title}
+                className="flex flex-col md:flex-row items-center gap-8 md:gap-24"
               >
-                <Icon icon={feature.icon} width={28} height={28} />
+                {/* Image Section */}
+                <div className={cn("flex-1 w-full", isEven ? "md:order-1" : "md:order-2")}>
+                  <div className="relative">
+                    <FeatureImageDialog
+                      image={feature.image}
+                      title={feature.title}
+                      description={feature.description}
+                    />
+                  </div>
+                </div>
+
+                {/* Text Section */}
+                <div
+                  className={cn(
+                    "flex-1 space-y-4 md:space-y-6",
+                    isEven ? "md:order-2" : "md:order-1",
+                  )}
+                >
+                  <h3 className="text-2xl md:text-3xl font-bold text-white">{feature.title}</h3>
+                  <p className="text-base md:text-lg text-neutral-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+                  {feature.note && (
+                    <div className="rounded-xl bg-neutral-900/80 border border-neutral-800 p-4 text-sm text-neutral-500">
+                      {feature.note}
+                    </div>
+                  )}
+                </div>
               </div>
-              <h3 className="mb-3 text-2xl font-bold text-white">{feature.title}</h3>
-              <p className="text-base text-neutral-400 leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -250,21 +283,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonial / Trust Placeholder */}
-      <section className="mx-auto max-w-6xl px-6 py-24 text-center">
-        <p className="mb-8 text-sm font-semibold uppercase tracking-widest text-neutral-600">
-          Trusted by early adopters
-        </p>
-        <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 opacity-30 grayscale invert">
-          {/* Logo placeholders using text for now */}
-          <span className="text-xl font-bold text-white">Acme Corp</span>
-          <span className="text-xl font-bold text-white">GlobalTech</span>
-          <span className="text-xl font-bold text-white">Nebula AI</span>
-          <span className="text-xl font-bold text-white">FoxRun</span>
-          <span className="text-xl font-bold text-white">Circle</span>
-        </div>
-      </section>
-
       {/* Bottom CTA */}
       <section className="relative overflow-hidden bg-neutral-900 py-24 text-center text-white border-t border-neutral-800">
         <div className="relative z-10 mx-auto max-w-6xl px-6">
@@ -272,7 +290,7 @@ export default function HomePage() {
             Ready to reclaim your chats?
           </h2>
           <p className="mb-10 text-lg text-neutral-400">
-            Join thousands of users who are building their personal AI knowledge base today.
+            Turn everyday chats into a personal AI knowledge base.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
@@ -283,7 +301,9 @@ export default function HomePage() {
               <span>Install for Chrome</span>
             </Link>
           </div>
-          <p className="mt-8 text-sm text-neutral-600">No credit card required for free plan.</p>
+          <p className="mt-8 text-sm text-neutral-600">
+            No credit card required for the free plan.
+          </p>
         </div>
 
         {/* Decorative background elements */}
