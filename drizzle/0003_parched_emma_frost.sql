@@ -1,0 +1,2 @@
+ALTER TABLE "chat_aside_sync_records" ADD COLUMN "server_order" bigint DEFAULT 0 NOT NULL;--> statement-breakpoint
+CREATE INDEX "sync_record_user_server_order_idx" ON "chat_aside_sync_records" USING btree ("user_id","server_order");
