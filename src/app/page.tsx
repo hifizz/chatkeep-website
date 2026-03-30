@@ -146,8 +146,8 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="max-w-2xl text-xl text-neutral-400 md:text-2xl">
-            The missing OS for your AI chats. Auto-save, aggregate, organize, and search everything
-            in one place.
+          The missing OS for your AI chats. Auto-save, aggregate, organize, highlight, and search your
+            conversations locally.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
