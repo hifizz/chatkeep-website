@@ -16,6 +16,9 @@ export type RpcError = {
 const getFallbackMessage = (status: number) => {
   if (status === 400) return "Bad Request";
   if (status === 401) return "Unauthorized";
+  if (status === 403) return "Forbidden";
+  if (status === 404) return "Not Found";
+  if (status === 429) return "Too Many Requests";
   if (status >= 500) return "Server Error";
   return "Request failed";
 };

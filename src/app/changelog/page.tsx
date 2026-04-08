@@ -2,6 +2,12 @@ import { MarketingShell } from "~/components/marketing/marketing-shell";
 
 const updates = [
   {
+    date: "April 7, 2026",
+    title: "Claude platform support",
+    description:
+      "Added Claude conversation support across sync and export flows, including note locate and highlight recovery in Claude chats.",
+  },
+  {
     date: "March 18, 2026",
     title: "Sync consistency upgrade",
     description:

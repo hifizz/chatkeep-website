@@ -1,19 +1,6 @@
+import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
-
-const upcomingPosts = [
-  {
-    title: "How to build a local-first AI chat library",
-    label: "Coming soon",
-  },
-  {
-    title: "From prompt to workflow: organizing AI conversations",
-    label: "Coming soon",
-  },
-  {
-    title: "Why TOC minimaps change long chat navigation",
-    label: "Coming soon",
-  },
-];
+import { publishedPosts, upcomingPosts } from "./posts";
 
 export default function BlogPage() {
   return (
@@ -30,20 +17,51 @@ export default function BlogPage() {
         </div>
 
         <div className="grid gap-4">
-          {upcomingPosts.map((post) => (
-            <div
-              key={post.title}
-              className="flex items-center justify-between rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 hover:bg-neutral-900 transition-colors"
+          {publishedPosts.map((post) => (
+            <Link
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 transition-colors hover:bg-neutral-900"
             >
-              <div>
-                <p className="text-lg font-semibold text-white">{post.title}</p>
-                <p className="text-xs text-neutral-400">Stay tuned.</p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                    <span>{post.date}</span>
+                    <span>{post.readTime}</span>
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold text-white">{post.title}</p>
+                    <p className="mt-2 text-sm text-neutral-400">{post.description}</p>
+                  </div>
+                </div>
+                <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs uppercase tracking-wide text-blue-200">
+                  {post.label}
+                </span>
               </div>
-              <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs uppercase tracking-wide text-neutral-500">
-                {post.label}
-              </span>
-            </div>
+            </Link>
           ))}
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
+            Coming soon
+          </p>
+          <div className="grid gap-4">
+            {upcomingPosts.map((post) => (
+              <div
+                key={post.title}
+                className="flex items-center justify-between rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 transition-colors hover:bg-neutral-900"
+              >
+                <div>
+                  <p className="text-lg font-semibold text-white">{post.title}</p>
+                  <p className="text-xs text-neutral-400">Stay tuned.</p>
+                </div>
+                <span className="rounded-full border border-neutral-800 px-3 py-1 text-xs uppercase tracking-wide text-neutral-500">
+                  {post.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </MarketingShell>

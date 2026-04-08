@@ -67,7 +67,7 @@ export const PRICING_PLANS = [
       { label: "Cloud sync", status: "available", highlight: true },
       { label: "TOC minimap navigation", status: "coming" },
       { label: "Prompt Library button", status: "coming" },
-      { label: "Share links", status: "coming" },
+      { label: "Share links", status: "available", highlight: true },
     ],
   },
   {
@@ -91,7 +91,7 @@ export const PRICING_PLANS = [
       { label: "Cloud sync", status: "available", highlight: true },
       { label: "TOC minimap navigation", status: "coming" },
       { label: "Prompt Library button", status: "coming" },
-      { label: "Share links", status: "coming" },
+      { label: "Share links", status: "available", highlight: true },
     ],
   },
 ] as const;

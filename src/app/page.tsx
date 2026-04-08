@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
-import { DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
+import { Claude, DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
@@ -18,9 +18,9 @@ const features = [
   {
     title: "Cross-platform chat aggregation",
     description:
-      "Aggregate chats from Gemini, ChatGPT, DeepSeek, and Grok with one click. Keep your AI conversation history in one searchable place.",
+      "Aggregate chats from Gemini, ChatGPT, Claude, DeepSeek, and Grok with one click. Keep your AI conversation history in one searchable place.",
     image: "/fa-sync-save.png",
-    note: "Supported platforms: Gemini, ChatGPT, DeepSeek, Grok",
+    note: "Supported platforms: Gemini, ChatGPT, Claude, DeepSeek, Grok",
   },
   {
     title: "Highlights and context memos",
@@ -81,6 +81,7 @@ const browsers = [
 const aiPlatforms = [
   { name: "Gemini", icon: Gemini.Color, status: "available" },
   { name: "ChatGPT", icon: OpenAI, status: "available" },
+  { name: "Claude", icon: Claude.Color, status: "available" },
   { name: "DeepSeek", icon: DeepSeek.Color, status: "available" },
   { name: "Grok", icon: Grok, status: "available" },
 ];

@@ -8,6 +8,7 @@ import type { SubscriptionStatus } from "~/lib/billing/types";
 import { PLAN_NAMES } from "~/lib/pricing";
 import { getServerSession } from "~/lib/session";
 import { getProfileForUser } from "~/server/billing/profile-service";
+import { ShareManagementPanel } from "./_components/share-management-panel";
 
 const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   trial: "Trial",
@@ -118,6 +119,18 @@ async function ProfileContent() {
           <Link href="/logout">Sign out</Link>
         </Button>
       </div>
+
+      <Card className="border-neutral-800 bg-neutral-900/50">
+        <CardHeader>
+          <CardTitle className="text-white">Share management</CardTitle>
+          <CardDescription className="text-neutral-400">
+            Manage chat shares, revoke access, and remove old links.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ShareManagementPanel isPro={profile.isPro} />
+        </CardContent>
+      </Card>
     </section>
   );
 }

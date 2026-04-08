@@ -125,7 +125,7 @@ export const userSubscription = createTable(
 
 export const syncRecord = createTable(
   "sync_records",
-  (d) => ({
+  (_d) => ({
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -155,4 +155,36 @@ export const billingWebhookEvent = createTable(
       .notNull(),
   }),
   (t) => [index("billing_webhook_event_provider_idx").on(t.provider)],
+);
+
+export const shareLink = createTable(
+  "share_link",
+  () => ({
+    id: text("id").primaryKey(),
+    ownerUserId: text("owner_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    sourceChatUrl: text("source_chat_url").notNull(),
+    sourcePlatform: text("source_platform").notNull(),
+    accessMode: text("access_mode").notNull(),
+    expiryMode: text("expiry_mode").notNull(),
+    expiresAt: timestamp("expires_at"),
+    passwordHash: text("password_hash"),
+    passwordSalt: text("password_salt"),
+    status: text("status").notNull(),
+    snapshotJson: text("snapshot_json").notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    revokedAt: timestamp("revoked_at"),
+  }),
+  (t) => [
+    index("share_link_owner_idx").on(t.ownerUserId),
+    index("share_link_status_idx").on(t.status),
+    index("share_link_expires_at_idx").on(t.expiresAt),
+  ],
 );
