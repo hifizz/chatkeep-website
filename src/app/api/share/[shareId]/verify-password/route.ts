@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { ShareError, asShareError } from "~/server/share/share-errors";
+import { asShareError } from "~/server/share/share-errors";
 import { takeRateLimit } from "~/server/share/share-rate-limit";
 import { verifySharePassword } from "~/server/share/share-service";
-import { getShareAccessCookieName, SHARE_ACCESS_COOKIE_MAX_AGE } from "~/server/share/share-access";
+import {
+  createShareAccessCookieValue,
+  getShareAccessCookieName,
+  SHARE_ACCESS_COOKIE_MAX_AGE,
+} from "~/server/share/share-access";
 
 const BodySchema = z.object({
   password: z.string().min(1),
@@ -30,7 +34,7 @@ export async function POST(request: Request, context: { params: Promise<{ shareI
     const response = NextResponse.json({ ok: true });
     response.cookies.set({
       name: getShareAccessCookieName(shareId),
-      value: "1",
+      value: createShareAccessCookieValue(shareId),
       maxAge: SHARE_ACCESS_COOKIE_MAX_AGE,
       httpOnly: true,
       sameSite: "lax",
@@ -39,7 +43,6 @@ export async function POST(request: Request, context: { params: Promise<{ shareI
     });
     return response;
   } catch (error) {
-    const normalized = asShareError(error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -50,23 +53,15 @@ export async function POST(request: Request, context: { params: Promise<{ shareI
         { status: 400 },
       );
     }
-    if (normalized instanceof ShareError) {
-      return NextResponse.json(
-        {
-          error: normalized.message,
-          code: normalized.code,
-          details: normalized.details,
-        },
-        { status: normalized.status },
-      );
-    }
-
+    const normalized = asShareError(error);
+    const isInternal = normalized.status >= 500 || normalized.code === "INTERNAL_ERROR";
     return NextResponse.json(
       {
-        error: "Failed to verify password",
-        code: "VALIDATION_ERROR",
+        error: isInternal ? "Internal server error" : normalized.message,
+        code: isInternal ? "INTERNAL_ERROR" : normalized.code,
+        details: isInternal ? undefined : normalized.details,
       },
-      { status: 400 },
+      { status: normalized.status },
     );
   }
 }

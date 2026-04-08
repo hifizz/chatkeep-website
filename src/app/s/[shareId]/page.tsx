@@ -6,7 +6,10 @@ import { cookies } from "next/headers";
 import { SharePasswordForm } from "./_components/share-password-form";
 import { ShareMarkdown } from "~/components/share/share-markdown";
 import { cn } from "~/lib/utils";
-import { getShareAccessCookieName } from "~/server/share/share-access";
+import {
+  getShareAccessCookieName,
+  verifyShareAccessCookieValue,
+} from "~/server/share/share-access";
 import { getShareForRender } from "~/server/share/share-service";
 
 export const metadata: Metadata = {
@@ -38,7 +41,7 @@ function SharePageFallback() {
 async function SharePageContent({ shareId }: { shareId: string }) {
   const cookieStore = await cookies();
   const accessCookie = cookieStore.get(getShareAccessCookieName(shareId));
-  const passwordVerified = accessCookie?.value === "1";
+  const passwordVerified = verifyShareAccessCookieValue(shareId, accessCookie?.value);
 
   const share = await getShareForRender(shareId, { passwordVerified });
 
