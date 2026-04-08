@@ -95,7 +95,7 @@ async function SharePageContent({ shareId }: { shareId: string }) {
           </Link>
         </div>
       </header>
-      <div className="mx-auto w-full max-w-4xl px-6 py-8">
+      <div className="mx-auto w-full max-w-3xl px-6 py-8">
         <section className="mb-8">
           <h1 className="text-xl font-semibold leading-8 text-white md:text-2xl">{data.title}</h1>
           <div className="mt-4 flex items-center gap-3">
@@ -128,7 +128,7 @@ async function SharePageContent({ shareId }: { shareId: string }) {
               <div
                 className={cn(
                   message.role === "user"
-                    ? "w-[80%] min-w-[16rem] rounded-2xl border border-neutral-700/90 bg-neutral-900/85 px-4 py-3 md:w-[72%] lg:w-[64%]"
+                    ? "w-[80%] min-w-[16rem] rounded-2xl border border-neutral-700/10 bg-neutral-800/85 px-4 py-3 md:w-[72%] lg:w-[64%]"
                     : "w-full",
                 )}
               >
