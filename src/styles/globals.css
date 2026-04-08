@@ -151,6 +151,65 @@
   }
 }
 
+@layer base {
+  /* Syntax highlight colors for rehype-highlight (hljs token classes). */
+  .hljs {
+    color: #e5e7eb;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: #94a3b8;
+    font-style: italic;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-subst {
+    color: #c4b5fd;
+  }
+
+  .hljs-string,
+  .hljs-attr,
+  .hljs-template-tag,
+  .hljs-template-variable {
+    color: #86efac;
+  }
+
+  .hljs-number,
+  .hljs-literal,
+  .hljs-variable,
+  .hljs-symbol,
+  .hljs-bullet {
+    color: #fca5a5;
+  }
+
+  .hljs-title,
+  .hljs-section,
+  .hljs-type,
+  .hljs-built_in {
+    color: #93c5fd;
+  }
+
+  .hljs-function,
+  .hljs-class {
+    color: #67e8f9;
+  }
+
+  .hljs-meta,
+  .hljs-doctag {
+    color: #fcd34d;
+  }
+
+  .hljs-deletion {
+    color: #f87171;
+  }
+
+  .hljs-addition {
+    color: #4ade80;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
