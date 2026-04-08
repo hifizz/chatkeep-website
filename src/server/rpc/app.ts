@@ -36,7 +36,8 @@ type RpcErrorCode =
   | "NOT_FOUND"
   | "EXPIRED_OR_REVOKED"
   | "RATE_LIMITED"
-  | "VALIDATION_ERROR";
+  | "VALIDATION_ERROR"
+  | "INTERNAL_ERROR";
 
 type RpcErrorPayload = {
   error: string;
@@ -54,12 +55,13 @@ const rpcError = (
 
 const mapShareError = (error: unknown) => {
   const normalized = asShareError(error);
+  const isInternal = normalized.status >= 500 || normalized.code === "INTERNAL_ERROR";
   return {
     status: normalized.status as RpcStatus,
     payload: {
-      error: normalized.message,
-      code: normalized.code,
-      details: normalized.details,
+      error: isInternal ? "Internal server error" : normalized.message,
+      code: isInternal ? "INTERNAL_ERROR" : normalized.code,
+      details: isInternal ? undefined : normalized.details,
     } satisfies RpcErrorPayload,
   };
 };

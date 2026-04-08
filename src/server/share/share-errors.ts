@@ -4,7 +4,8 @@ export type ShareErrorCode =
   | "NOT_FOUND"
   | "EXPIRED_OR_REVOKED"
   | "RATE_LIMITED"
-  | "VALIDATION_ERROR";
+  | "VALIDATION_ERROR"
+  | "INTERNAL_ERROR";
 
 export class ShareError extends Error {
   code: ShareErrorCode;
@@ -21,9 +22,7 @@ export class ShareError extends Error {
 
 export const asShareError = (error: unknown): ShareError => {
   if (error instanceof ShareError) return error;
-  if (error instanceof Error) {
-    return new ShareError("VALIDATION_ERROR", error.message, 400);
-  }
+  if (error instanceof Error) return new ShareError("INTERNAL_ERROR", "Internal server error", 500);
 
-  return new ShareError("VALIDATION_ERROR", "Invalid request", 400);
+  return new ShareError("INTERNAL_ERROR", "Internal server error", 500);
 };
