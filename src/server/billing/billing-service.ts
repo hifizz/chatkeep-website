@@ -11,10 +11,15 @@ import {
 } from "./config";
 import { resolveRedirectUrl } from "./redirects";
 import { createStripeCheckout } from "./stripe";
-import { hasUsedTrial } from "./subscription-repo";
+import {
+  createSignupTrialSubscriptionIfAbsent,
+  getSubscriptionRecordForUser,
+  hasUsedTrial,
+} from "./subscription-repo";
 
 const DEFAULT_SUCCESS_PATH = "/billing/success";
 const DEFAULT_CANCEL_PATH = "/pricing?checkout=cancel";
+const SIGNUP_TRIAL_DAYS = 30;
 
 const assertPlanKey = (planKey: PlanKey) => {
   const plan = getPlanConfig(planKey);
@@ -90,4 +95,29 @@ export const createCheckout = async (
   );
 
   return { provider, url: checkout.url };
+};
+
+export const grantSignupTrialIfEligible = async (user: { id: string }, now = new Date()) => {
+  const existingSubscription = await getSubscriptionRecordForUser(user.id);
+  if (existingSubscription) {
+    return {
+      granted: false,
+      record: existingSubscription,
+    };
+  }
+
+  const trialEndsAt = new Date(now.getTime());
+  trialEndsAt.setDate(trialEndsAt.getDate() + SIGNUP_TRIAL_DAYS);
+
+  const result = await createSignupTrialSubscriptionIfAbsent({
+    userId: user.id,
+    provider: getDefaultProvider(),
+    currentPeriodStart: now,
+    currentPeriodEnd: trialEndsAt,
+  });
+
+  return {
+    granted: result.created,
+    record: result.record,
+  };
 };

@@ -21,7 +21,26 @@ export type UpsertSubscriptionInput = {
   providerSubscriptionId?: string | null;
 };
 
+type CreateSignupTrialInput = {
+  userId: string;
+  provider: BillingProvider;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+};
+
+const SIGNUP_TRIAL_PLAN: PlanKey = "monthly";
+
 const getWebhookEventId = (provider: BillingProvider, eventId: string) => `${provider}:${eventId}`;
+
+const selectSubscriptionRecordForUser = async (userId: string) => {
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(userSubscription)
+    .where(eq(userSubscription.userId, userId))
+    .limit(1);
+  return rows[0] ?? null;
+};
 
 export const hasProcessedWebhookEvent = async (provider: BillingProvider, eventId: string) => {
   if (!db) return false;
@@ -56,21 +75,28 @@ export const recordWebhookEvent = async (
   return true;
 };
 
-export const getSubscriptionForUser = async (userId: string) => {
-  if (!db) return null;
-  const rows = await db
-    .select()
-    .from(userSubscription)
-    .where(eq(userSubscription.userId, userId))
-    .limit(1);
-  if (rows.length === 0) return null;
+export const getSubscriptionRecordForUser = async (userId: string) => {
+  return selectSubscriptionRecordForUser(userId);
+};
 
-  const record = rows[0];
+export const getSubscriptionForUser = async (userId: string) => {
+  const record = await selectSubscriptionRecordForUser(userId);
   if (!record) return null;
+  const now = new Date();
+
+  if (record.status === "trial" && record.trialEndsAt && now >= record.trialEndsAt) {
+    const updated = await db
+      .update(userSubscription)
+      .set({ status: "canceled", cancelAtPeriodEnd: true, updatedAt: now })
+      .where(eq(userSubscription.userId, userId))
+      .returning();
+    return updated[0] ?? { ...record, status: "canceled", cancelAtPeriodEnd: true };
+  }
+
   if (record.status === "past_due" && !record.pastDueAt) {
     const updated = await db
       .update(userSubscription)
-      .set({ pastDueAt: record.updatedAt ?? new Date(), updatedAt: new Date() })
+      .set({ pastDueAt: record.updatedAt ?? now, updatedAt: now })
       .where(eq(userSubscription.userId, userId))
       .returning();
     return updated[0] ?? record;
@@ -81,12 +107,12 @@ export const getSubscriptionForUser = async (userId: string) => {
     const deadline = new Date(record.pastDueAt.getTime());
     deadline.setDate(deadline.getDate() + graceDays);
 
-    if (new Date() > deadline) {
+    if (now > deadline) {
       const updated = await db
         .update(userSubscription)
         .set({
           status: "canceled",
-          updatedAt: new Date(),
+          updatedAt: now,
         })
         .where(eq(userSubscription.userId, userId))
         .returning();
@@ -147,6 +173,41 @@ export const hasUsedTrial = async (userId: string) => {
     .where(eq(userSubscription.userId, userId))
     .limit(1);
   return rows[0]?.trialUsed ?? false;
+};
+
+export const createSignupTrialSubscriptionIfAbsent = async (input: CreateSignupTrialInput) => {
+  if (!db) {
+    return { created: false, record: null as SubscriptionRecord | null };
+  }
+
+  const now = new Date();
+  const created = await db
+    .insert(userSubscription)
+    .values({
+      userId: input.userId,
+      planKey: SIGNUP_TRIAL_PLAN,
+      provider: input.provider,
+      status: "trial",
+      currentPeriodStart: input.currentPeriodStart,
+      currentPeriodEnd: input.currentPeriodEnd,
+      cancelAtPeriodEnd: false,
+      trialEndsAt: input.currentPeriodEnd,
+      trialUsed: true,
+      pastDueAt: null,
+      providerCustomerId: null,
+      providerSubscriptionId: null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .onConflictDoNothing({ target: userSubscription.userId })
+    .returning();
+
+  if (created[0]) {
+    return { created: true, record: created[0] };
+  }
+
+  const existing = await selectSubscriptionRecordForUser(input.userId);
+  return { created: false, record: existing };
 };
 
 export const upsertSubscription = async (input: UpsertSubscriptionInput) => {
