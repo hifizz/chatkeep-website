@@ -5,6 +5,7 @@ import { db } from "~/server/db";
 import { env } from "~/env";
 import { sendEmail } from "./email";
 import { syncCreemRefundEvent, syncCreemSubscriptionEvent } from "~/server/billing/creem-sync";
+import { grantSignupTrialIfEligible } from "~/server/billing/billing-service";
 import { getAllowedOrigins, isExtensionOrigin } from "./allowed-origins";
 
 const ResetPasswordTemplate = ({ url }: { url: string }) => `
@@ -56,6 +57,22 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          try {
+            await grantSignupTrialIfEligible({ id: user.id });
+          } catch (error) {
+            console.error("[auth] failed to grant signup trial", {
+              userId: user.id,
+              error,
+            });
+          }
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
