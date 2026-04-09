@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
@@ -39,7 +40,9 @@ async function SignupSuccessGate() {
 export default function SignupSuccessPage() {
   return (
     <AuthPageShell>
-      <SignupSuccessGate />
+      <Suspense fallback={<div className="text-sm text-muted-foreground">Loading...</div>}>
+        <SignupSuccessGate />
+      </Suspense>
     </AuthPageShell>
   );
 }
