@@ -8,8 +8,8 @@ import { Label } from "~/components/ui/label";
 import { signUp } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { notifyAuthRefresh } from "~/lib/extension";
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { Spinner } from "~/components/ui/spinner";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -62,7 +62,7 @@ export function SignUpForm() {
               placeholder="Your Name"
               required
               disabled={loading}
-              className="h-11 text-base"
+              className="auth-input h-11 text-base"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -77,7 +77,7 @@ export function SignUpForm() {
               placeholder="m@example.com"
               required
               disabled={loading}
-              className="h-11 text-base"
+              className="auth-input h-11 text-base"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -92,7 +92,7 @@ export function SignUpForm() {
               placeholder="Create a password"
               required
               disabled={loading}
-              className="h-11 text-base"
+              className="auth-input h-11 text-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -105,8 +105,8 @@ export function SignUpForm() {
           >
             {loading ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                Processing...
+                <Spinner />
+                Create an account
               </>
             ) : (
               "Create an account"

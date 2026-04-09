@@ -9,7 +9,7 @@ import { signIn } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { notifyAuthRefresh } from "~/lib/extension";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "~/components/ui/spinner";
 
 export function LoginForm() {
   const router = useRouter();
@@ -61,7 +61,7 @@ export function LoginForm() {
               placeholder="m@example.com"
               required
               disabled={loading}
-              className="h-11 text-base"
+              className="auth-input h-11 text-base"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -76,7 +76,7 @@ export function LoginForm() {
               placeholder="Enter your password"
               required
               disabled={loading}
-              className="h-11 text-base"
+              className="auth-input h-11 text-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -89,8 +89,8 @@ export function LoginForm() {
           >
             {loading ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                Processing...
+                <Spinner />
+                Login
               </>
             ) : (
               "Login"
