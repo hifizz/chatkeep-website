@@ -36,8 +36,8 @@ export default function PrivacyPage() {
           <h2>Cookies and analytics choices</h2>
           <p>
             You can accept or reject analytics cookies through the cookie banner. If you reject,
-            analytics scripts will not load. You can change your choice by clearing site data and
-            revisiting the site.
+            analytics scripts will not load and only essential cookies are used. Your choice is
+            stored for 12 months and can be changed by clearing site data before revisiting.
           </p>
 
           <h2>Data retention</h2>

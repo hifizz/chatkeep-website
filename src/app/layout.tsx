@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
+import { CookieConsentBanner } from "~/components/cookie-consent-banner";
+import { env } from "~/env";
+
 export const metadata: Metadata = {
   title: "ChatKeep – The Missing OS for AI Chats",
   description:
@@ -49,6 +52,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           disableTransitionOnChange
         >
           {children}
+          <CookieConsentBanner
+            gaId={env.NEXT_PUBLIC_GA_ID}
+            clarityId={env.NEXT_PUBLIC_CLARITY_ID}
+          />
         </ThemeProvider>
       </body>
     </html>
