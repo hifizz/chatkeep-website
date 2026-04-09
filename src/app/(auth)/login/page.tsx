@@ -13,7 +13,7 @@ async function LoginGate() {
 export default function LoginPage() {
   return (
     <AuthPageShell>
-      <Suspense fallback={<div className="text-sm text-muted-foreground">正在加载…</div>}>
+      <Suspense fallback={<div className="text-sm text-muted-foreground">Loading...</div>}>
         <LoginGate />
       </Suspense>
     </AuthPageShell>

@@ -8,6 +8,8 @@ import { Label } from "~/components/ui/label";
 import { signUp } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { notifyAuthRefresh } from "~/lib/extension";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -15,10 +17,13 @@ export function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError(null);
+    setLoading(true);
     try {
       const result = await signUp.email({
         name,
@@ -33,6 +38,8 @@ export function SignUpForm() {
       }
     } catch (_err) {
       setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,6 +61,7 @@ export function SignUpForm() {
               id="name"
               placeholder="Your Name"
               required
+              disabled={loading}
               className="h-11 text-base"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -68,6 +76,7 @@ export function SignUpForm() {
               type="email"
               placeholder="m@example.com"
               required
+              disabled={loading}
               className="h-11 text-base"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -80,17 +89,49 @@ export function SignUpForm() {
             <Input
               id="password"
               type="password"
+              placeholder="Create a password"
               required
+              disabled={loading}
               className="h-11 text-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="h-11 w-full text-base font-medium">
-            Create an account
+          <Button
+            type="submit"
+            disabled={loading}
+            className="h-11 w-full cursor-pointer text-base font-medium disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Create an account"
+            )}
           </Button>
+
+          <p className="text-left text-xs leading-relaxed text-muted-foreground">
+            Please review our{" "}
+            <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
+              Privacy Policy
+            </Link>
+            before creating your account.
+          </p>
         </form>
+
+        <div className="mt-4 text-center text-sm">
+          Already have an account?{" "}
+          <Link href="/login" className="underline">
+            Log in
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );

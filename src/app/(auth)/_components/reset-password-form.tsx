@@ -66,6 +66,7 @@ function ResetPasswordFormComponent() {
             <Input
               id="password"
               type="password"
+              placeholder="Enter your new password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -77,6 +78,7 @@ function ResetPasswordFormComponent() {
             <Input
               id="confirm-password"
               type="password"
+              placeholder="Confirm your new password"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
