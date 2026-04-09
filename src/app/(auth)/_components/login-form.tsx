@@ -9,16 +9,20 @@ import { signIn } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { notifyAuthRefresh } from "~/lib/extension";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError(null);
+    setLoading(true);
     try {
       const result = await signIn.email({
         email,
@@ -32,6 +36,8 @@ export function LoginForm() {
       }
     } catch (_err) {
       setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,6 +60,7 @@ export function LoginForm() {
               type="email"
               placeholder="m@example.com"
               required
+              disabled={loading}
               className="h-11 text-base"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -66,15 +73,28 @@ export function LoginForm() {
             <Input
               id="password"
               type="password"
+              placeholder="Enter your password"
               required
+              disabled={loading}
               className="h-11 text-base"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="h-11 w-full text-base font-medium">
-            Login
+          <Button
+            type="submit"
+            disabled={loading}
+            className="h-11 w-full cursor-pointer text-base font-medium disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
