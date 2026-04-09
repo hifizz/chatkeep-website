@@ -34,6 +34,38 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 - `pnpm lint` runs ESLint; `pnpm lint:fix` applies ESLint fixes; `pnpm format` uses Prettier; `pnpm typecheck` runs `tsc --noEmit`.
 - Database: `pnpm db:push` (dev sync), `pnpm db:generate` + `pnpm db:migrate` (migrations), `pnpm db:studio` (GUI). `./start-database.sh` boots a local Postgres container from `.env`.
 
+## Drizzle Workflow (Must)
+
+### 日常开发（feature 分支）
+- MUST: 功能开发阶段只允许在本地开发数据库执行 pnpm db:push 做 schema 同步。
+- MUST NOT: 在 feature 分支对共享开发库、测试库、生产库执行
+  db:push、db:generate、db:migrate。
+- MUST NOT: 在 feature 分支执行 pnpm db:generate 或 pnpm db:migrate。
+
+### 提交 PR 前（schema 有变化时）
+- MUST: 先确认 schema.ts 相比 origin/main 有实质变化；
+  若无变化，跳过以下步骤，不提交任何迁移文件。
+- MUST: 执行 git fetch origin && git rebase origin/main。
+- MUST: 若 rebase 后 drizzle/meta/ 出现 Git 冲突，
+  始终 accept main 的版本（git checkout --theirs drizzle/），
+  删除本分支 rebase 前已生成的迁移文件，再继续。
+- MUST: 执行 pnpm db:generate。
+- MUST: 执行 pnpm db:check，确认无错误后再提交。
+- MUST: 将 drizzle/*.sql 与 drizzle/meta/* 一并提交。
+
+### PR 等待合并期间
+- MUST: 若等待期间 main 有新 commit 进入，
+  必须重新执行上方"提交 PR 前"的完整流程，用新文件覆盖旧的再次提交。
+
+### 迁移文件规范
+- MUST NOT: 修改已提交的历史迁移文件（0000~00xx.sql）；只允许追加新 migration。
+
+### 部署
+- MUST: 合并到 main 后，仅允许由 main 的 CI/CD 或发布流程
+  执行 pnpm db:migrate 到共享环境。
+- MUST: 若需验证迁移可重复执行性，在干净数据库执行 pnpm db:migrate，
+  不要在被 db:push 改写过的数据库直接验证。
+
 ## Coding guideline
 必须遵守以下软件工程开发原则：
 1. DRY (Don't Repeat Yourself - 不重复): 发现任何形式的代码重复，都应立即将其抽象为可复用的函数、组件或类。杜绝复制粘贴。
@@ -64,3 +96,5 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 ## Agent-Specific Instructions
 - For proposals or significant changes, consult `openspec/AGENTS.md` and follow the OpenSpec workflow.
+- MUST: 仅实现用户当前明确请求范围内的需求与代码修改。
+- MUST NOT: 禁止“顺手补交”“顺手多做一个需求”或“顺手补充额外代码”（包括未明确要求的重构、功能扩展、额外脚本、额外迁移）。
