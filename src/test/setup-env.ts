@@ -16,6 +16,8 @@ vi.mock("~/env", () => ({
     CREEM_PRODUCT_ID_ANNUAL: "creem_annual_test",
     SUBSCRIPTION_TRIAL_DAYS: 7,
     PAST_DUE_GRACE_DAYS: 5,
+    RELEASE_SYNC_SECRET: "release-sync-test-secret",
+    RELEASE_SYNC_ALLOWED_REPO: undefined,
     NEXT_PUBLIC_GA_ID: undefined,
     NEXT_PUBLIC_CLARITY_ID: undefined,
   },

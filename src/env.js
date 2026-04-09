@@ -21,6 +21,8 @@ export const env = createEnv({
     CREEM_PRODUCT_ID_ANNUAL: z.string().optional(),
     SUBSCRIPTION_TRIAL_DAYS: z.coerce.number().int().min(0).optional(),
     PAST_DUE_GRACE_DAYS: z.coerce.number().int().min(0).optional(),
+    RELEASE_SYNC_SECRET: z.string().optional(),
+    RELEASE_SYNC_ALLOWED_REPO: z.string().optional(),
   },
 
   /**
@@ -52,6 +54,8 @@ export const env = createEnv({
     CREEM_PRODUCT_ID_ANNUAL: process.env.CREEM_PRODUCT_ID_ANNUAL,
     SUBSCRIPTION_TRIAL_DAYS: process.env.SUBSCRIPTION_TRIAL_DAYS,
     PAST_DUE_GRACE_DAYS: process.env.PAST_DUE_GRACE_DAYS,
+    RELEASE_SYNC_SECRET: process.env.RELEASE_SYNC_SECRET,
+    RELEASE_SYNC_ALLOWED_REPO: process.env.RELEASE_SYNC_ALLOWED_REPO,
     NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
     NEXT_PUBLIC_CLARITY_ID: process.env.NEXT_PUBLIC_CLARITY_ID,
   },

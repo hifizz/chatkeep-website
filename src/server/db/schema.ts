@@ -10,6 +10,7 @@ import {
   text,
   timestamp,
   boolean,
+  uniqueIndex,
   // integer,
   // pgTable,
 } from "drizzle-orm/pg-core";
@@ -187,4 +188,67 @@ export const shareLink = createTable(
     index("share_link_status_idx").on(t.status),
     index("share_link_expires_at_idx").on(t.expiresAt),
   ],
+);
+
+export const extensionRelease = createTable(
+  "extension_release",
+  () => ({
+    id: text("id").primaryKey(),
+    sourceRepo: text("source_repo").notNull(),
+    releaseId: text("release_id").notNull(),
+    channel: text("channel").notNull(),
+    version: text("version").notNull(),
+    tag: text("tag"),
+    commitSha: text("commit_sha").notNull(),
+    commitRef: text("commit_ref").notNull(),
+    releasedAt: timestamp("released_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [
+    uniqueIndex("extension_release_release_id_uidx").on(t.releaseId),
+    index("extension_release_channel_released_at_idx").on(t.channel, t.releasedAt),
+    index("extension_release_created_at_idx").on(t.createdAt),
+  ],
+);
+
+export const extensionReleaseArtifact = createTable(
+  "extension_release_artifact",
+  () => ({
+    id: text("id").primaryKey(),
+    releaseRecordId: text("release_record_id")
+      .notNull()
+      .references(() => extensionRelease.id, { onDelete: "cascade" }),
+    browser: text("browser").notNull(),
+    fileName: text("file_name").notNull(),
+    downloadUrl: text("download_url").notNull(),
+    sha256: text("sha256").notNull(),
+    sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+    contentType: text("content_type").notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [
+    index("extension_release_artifact_release_idx").on(t.releaseRecordId),
+    uniqueIndex("extension_release_artifact_release_browser_uidx").on(t.releaseRecordId, t.browser),
+  ],
+);
+
+export const extensionReleaseLatest = createTable(
+  "extension_release_latest",
+  () => ({
+    channel: text("channel").primaryKey(),
+    releaseRecordId: text("release_record_id")
+      .notNull()
+      .references(() => extensionRelease.id, { onDelete: "cascade" }),
+    version: text("version").notNull(),
+    tag: text("tag"),
+    releasedAt: timestamp("released_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [index("extension_release_latest_release_idx").on(t.releaseRecordId)],
 );

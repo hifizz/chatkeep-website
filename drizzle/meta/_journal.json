@@ -36,6 +36,13 @@
       "when": 1775559220692,
       "tag": "0004_kind_gamma_corps",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775735435680,
+      "tag": "0005_neat_solo",
+      "breakpoints": true
     }
   ]
 }

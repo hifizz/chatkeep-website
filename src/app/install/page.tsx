@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
+import { getChannelLatest } from "~/server/release/release-service";
+import type { BrowserTarget } from "~/types/release-sync";
 
 const steps = [
   {
@@ -17,7 +19,21 @@ const steps = [
   },
 ];
 
-export default function InstallPage() {
+const browserOrder: BrowserTarget[] = ["chrome", "firefox", "edge", "safari"];
+
+const browserLabelMap: Record<BrowserTarget, string> = {
+  chrome: "Chrome",
+  firefox: "Firefox",
+  edge: "Edge",
+  safari: "Safari",
+};
+
+export default async function InstallPage() {
+  const stableRelease = await getChannelLatest("stable");
+  const artifactsByBrowser = new Map(
+    (stableRelease?.artifacts ?? []).map((artifact) => [artifact.browser, artifact]),
+  );
+
   return (
     <MarketingShell>
       <section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-16 pt-12">
@@ -53,6 +69,46 @@ export default function InstallPage() {
             ChatKeep requests only the permissions needed to read and save chat content. Your data
             stays on your device.
           </p>
+        </div>
+
+        <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-white">Latest Stable Release</h2>
+          {stableRelease ? (
+            <>
+              <p className="text-sm text-neutral-400">
+                Version {stableRelease.version}
+                {stableRelease.tag ? ` (${stableRelease.tag})` : ""}
+                {" · "}
+                {new Date(stableRelease.releasedAt).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {browserOrder.map((browser) => {
+                  const artifact = artifactsByBrowser.get(browser);
+                  if (!artifact) return null;
+                  return (
+                    <a
+                      key={browser}
+                      href={artifact.downloadUrl}
+                      className="inline-flex items-center justify-center rounded-full border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+                    >
+                      Download for {browserLabelMap[browser]}
+                    </a>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-400">
+              Stable release metadata is not available yet. Please check back after the next tagged
+              release.
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
