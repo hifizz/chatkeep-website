@@ -68,11 +68,6 @@ async function ensureMigrationBaseline({ databaseUrl, migrationsDir, journalPath
     return;
   }
 
-  const expectedTables = readExpectedSchema(journal, migrationsDir);
-  if (expectedTables.length === 0) {
-    return;
-  }
-
   const sql = postgres(databaseUrl, { max: 1 });
 
   try {
@@ -112,27 +107,45 @@ async function ensureMigrationBaseline({ databaseUrl, migrationsDir, journalPath
       return;
     }
 
-    const incompleteTables = expectedTables.filter((table) => {
-      const columns = existingByTable.get(table.name);
-      return !columns || table.columns.some((column) => !columns.has(column));
+    const latestEntryIndex = journal.entries.length - 1;
+    const latestExpectedTables = readExpectedSchemaByEntry({
+      journal,
+      migrationsDir,
+      entryIndex: latestEntryIndex,
     });
+    const latestIncompleteTables = findIncompleteTables(latestExpectedTables, existingByTable);
 
-    if (incompleteTables.length > 0) {
-      const details = incompleteTables
-        .map((table) => {
-          const existing = existingByTable.get(table.name) ?? new Set();
-          const missingColumns = table.columns.filter((column) => !existing.has(column));
-          return `${table.name}: 缺少 ${missingColumns.join(", ")}`;
-        })
-        .join("; ");
+    let baselineEntryIndex = latestIncompleteTables.length === 0 ? latestEntryIndex : -1;
 
+    if (baselineEntryIndex < 0) {
+      for (let entryIndex = latestEntryIndex - 1; entryIndex >= 0; entryIndex--) {
+        const expectedTablesAtEntry = readExpectedSchemaByEntry({
+          journal,
+          migrationsDir,
+          entryIndex,
+        });
+        const incompleteAtEntry = findIncompleteTables(expectedTablesAtEntry, existingByTable);
+        if (incompleteAtEntry.length === 0) {
+          baselineEntryIndex = entryIndex;
+          break;
+        }
+      }
+    }
+
+    if (baselineEntryIndex < 0) {
+      const details = formatMissingTableDetails(latestIncompleteTables, existingByTable);
       throw new Error(
-        `检测到数据库已有部分表结构，但与最新迁移不一致，已停止自动补基线。${details}`,
+        `检测到数据库已有部分表结构，但无法匹配任何历史迁移基线，已停止自动补基线。${details}`,
       );
     }
 
+    const baselineMigrations = migrations.slice(0, baselineEntryIndex + 1);
+    if (baselineMigrations.length === 0) {
+      return;
+    }
+
     await sql.begin(async (tx) => {
-      for (const migration of migrations) {
+      for (const migration of baselineMigrations) {
         await tx`
           insert into drizzle.__drizzle_migrations (hash, created_at)
           values (${migration.hash}, ${migration.createdAt})
@@ -140,20 +153,28 @@ async function ensureMigrationBaseline({ databaseUrl, migrationsDir, journalPath
       }
     });
 
+    if (baselineEntryIndex === latestEntryIndex) {
+      console.log(
+        `检测到数据库表结构已存在但 Drizzle 迁移历史为空，已自动补齐 ${baselineMigrations.length} 条基线记录。`,
+      );
+      return;
+    }
+
+    const remainingCount = migrations.length - baselineMigrations.length;
     console.log(
-      `检测到数据库表结构已存在但 Drizzle 迁移历史为空，已自动补齐 ${migrations.length} 条基线记录。`,
+      `检测到数据库处于部分迁移状态，已自动补齐前 ${baselineMigrations.length} 条基线（截至 ${journal.entries[baselineEntryIndex].tag}），将继续执行剩余 ${remainingCount} 条迁移。`,
     );
   } finally {
     await sql.end({ timeout: 1 });
   }
 }
 
-function readExpectedSchema(journal, migrationsDir) {
-  const latestEntry = journal.entries[journal.entries.length - 1];
+function readExpectedSchemaByEntry({ journal, migrationsDir, entryIndex }) {
+  const entry = journal.entries[entryIndex];
   const snapshotPath = path.join(
     migrationsDir,
     "meta",
-    `${latestEntry.idx.toString().padStart(4, "0")}_snapshot.json`,
+    `${entry.idx.toString().padStart(4, "0")}_snapshot.json`,
   );
   const snapshot = JSON.parse(readFileSync(snapshotPath, "utf8"));
 
@@ -163,4 +184,21 @@ function readExpectedSchema(journal, migrationsDir) {
       name: table.name,
       columns: Object.keys(table.columns),
     }));
+}
+
+function findIncompleteTables(expectedTables, existingByTable) {
+  return expectedTables.filter((table) => {
+    const columns = existingByTable.get(table.name);
+    return !columns || table.columns.some((column) => !columns.has(column));
+  });
+}
+
+function formatMissingTableDetails(incompleteTables, existingByTable) {
+  return incompleteTables
+    .map((table) => {
+      const existing = existingByTable.get(table.name) ?? new Set();
+      const missingColumns = table.columns.filter((column) => !existing.has(column));
+      return `${table.name}: 缺少 ${missingColumns.join(", ")}`;
+    })
+    .join("; ");
 }

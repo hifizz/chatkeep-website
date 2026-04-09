@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { getChannelLatest } from "~/server/release/release-service";
 
@@ -79,9 +80,36 @@ const updates = [
   },
 ];
 
-export default async function ChangelogPage() {
+async function LatestStableSection() {
   const stableRelease = await getChannelLatest("stable");
 
+  if (!stableRelease) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-3xl border border-emerald-700/50 bg-emerald-950/30 p-6">
+      <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">Latest Stable</p>
+      <h2 className="mt-2 text-lg font-semibold text-white">
+        {stableRelease.version}
+        {stableRelease.tag ? ` · ${stableRelease.tag}` : ""}
+      </h2>
+      <p className="mt-2 text-sm text-neutral-300">
+        Published on{" "}
+        {new Date(stableRelease.releasedAt).toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+        .
+      </p>
+    </div>
+  );
+}
+
+export default function ChangelogPage() {
   return (
     <MarketingShell>
       <section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-16 pt-12">
@@ -95,26 +123,9 @@ export default async function ChangelogPage() {
           </p>
         </div>
 
-        {stableRelease ? (
-          <div className="rounded-3xl border border-emerald-700/50 bg-emerald-950/30 p-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">Latest Stable</p>
-            <h2 className="mt-2 text-lg font-semibold text-white">
-              {stableRelease.version}
-              {stableRelease.tag ? ` · ${stableRelease.tag}` : ""}
-            </h2>
-            <p className="mt-2 text-sm text-neutral-300">
-              Published on{" "}
-              {new Date(stableRelease.releasedAt).toLocaleString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              .
-            </p>
-          </div>
-        ) : null}
+        <Suspense fallback={null}>
+          <LatestStableSection />
+        </Suspense>
 
         <div className="space-y-4">
           {updates.map((update) => (
