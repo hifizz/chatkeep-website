@@ -28,14 +28,6 @@ export function MarketingHeaderCta() {
 
   return (
     <div className="flex items-center gap-2">
-      <Link
-        href="/install"
-        aria-busy={isPending}
-        className="inline-flex h-9 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 active:scale-95"
-      >
-        Install
-      </Link>
-
       {session ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -61,7 +53,15 @@ export function MarketingHeaderCta() {
             <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      ) : null}
+      ) : (
+        <Link
+          href="/install"
+          aria-busy={isPending}
+          className="inline-flex h-9 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-200 active:scale-95"
+        >
+          Install
+        </Link>
+      )}
     </div>
   );
 }
