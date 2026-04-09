@@ -1,1 +1,22 @@
+#!/usr/bin/env sh
+set -eu
+
+branch_name="$(git branch --show-current)"
+
+if [ "$branch_name" != "main" ] && [ "$branch_name" != "master" ]; then
+  added_files="$(git diff --cached --name-only --diff-filter=A)"
+  blocked_files="$(
+    printf '%s\n' "$added_files" \
+      | grep -E '^drizzle/meta/|^drizzle/[0-9]{4}_.+\.sql$' || true
+  )"
+
+  if [ -n "$blocked_files" ]; then
+    echo "❌ 当前分支 ($branch_name) 不允许提交新的 Drizzle 迁移文件或 meta 文件。"
+    echo "请在 main/master 分支处理 migration 产物。"
+    echo
+    echo "$blocked_files"
+    exit 1
+  fi
+fi
+
 pnpm lint-staged
