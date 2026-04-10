@@ -13,24 +13,34 @@ const navItems = [
   { label: "Changelog", href: "/changelog" },
 ];
 
-export function MarketingShell({ children }: { children: React.ReactNode }) {
+type MarketingShellProps = {
+  children: React.ReactNode;
+  brandBadge?: string;
+};
+
+export function MarketingShell({ children, brandBadge }: MarketingShellProps) {
   return (
     <div className="relative min-h-screen flex flex-col bg-neutral-950 text-neutral-50 font-sans selection:bg-blue-500/30 selection:text-blue-200">
       {/* Sticky Header */}
-
       <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-neutral-950/80 backdrop-blur-md transition-all duration-200 hover:border-white/10">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 transition hover:opacity-80">
-            <Image
-              src="/logo.png"
-              alt="ChatKeep logo"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-xl object-cover shadow-sm shadow-white/10"
-            />
-
-            <span className="text-xl font-bold tracking-tight text-white">ChatKeep</span>
-          </Link>
+          <div className="flex items-center gap-2.5">
+            <Link href="/" className="flex items-center gap-2 transition hover:opacity-80">
+              <Image
+                src="/logo.png"
+                alt="ChatKeep logo"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-xl object-cover shadow-sm shadow-white/10"
+              />
+              <span className="text-xl font-bold tracking-tight text-white">ChatKeep</span>
+            </Link>
+            {brandBadge ? (
+              <span className="inline-flex items-center rounded-full border border-emerald-400/45 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                {brandBadge}
+              </span>
+            ) : null}
+          </div>
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-neutral-400 lg:flex">
             {navItems.map((item) => (
@@ -44,7 +54,6 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
             <div className="lg:hidden">
               <MarketingMobileMenu items={navItems} />
             </div>
-
             <MarketingHeaderCta />
           </div>
         </div>

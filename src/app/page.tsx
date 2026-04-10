@@ -136,7 +136,7 @@ function InstallChromeButton() {
 
 export default function HomePage() {
   return (
-    <MarketingShell>
+    <MarketingShell brandBadge="Beta">
       {/* Hero Section */}
       <section className="relative mx-auto max-w-6xl px-6 pt-12 pb-16 text-center animate-rise overflow-visible md:pt-20">
         <div className="flex flex-col items-center gap-6">
