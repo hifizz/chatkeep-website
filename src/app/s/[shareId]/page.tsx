@@ -3,9 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { ShareMessageFeed } from "./_components/share-message-feed";
 import { SharePasswordForm } from "./_components/share-password-form";
-import { ShareMarkdown } from "~/components/share/share-markdown";
-import { cn } from "~/lib/utils";
 import {
   getShareAccessCookieName,
   verifyShareAccessCookieValue,
@@ -30,7 +29,7 @@ export const metadata: Metadata = {
 
 function SharePageFallback() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-12 text-neutral-100">
+    <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center bg-neutral-900 px-6 py-12 text-neutral-100">
       <section className="w-full text-center">
         <h1 className="text-2xl font-semibold">Loading shared chat...</h1>
       </section>
@@ -47,7 +46,7 @@ async function SharePageContent({ shareId }: { shareId: string }) {
 
   if (share.state === "invalid") {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-12 text-neutral-100">
+      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center bg-neutral-900 px-6 py-12 text-neutral-100">
         <section className="w-full text-center">
           <h1 className="text-2xl font-semibold">Share link unavailable</h1>
           <p className="mt-3 text-sm text-neutral-400">
@@ -60,7 +59,7 @@ async function SharePageContent({ shareId }: { shareId: string }) {
 
   if (share.state === "requires-password") {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-6 py-12 text-neutral-100">
+      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center bg-neutral-900 px-6 py-12 text-neutral-100">
         <section className="w-full max-w-xl space-y-4">
           <div className="space-y-2 text-center">
             <h1 className="text-2xl font-semibold">Access Code Protected Share</h1>
@@ -75,10 +74,11 @@ async function SharePageContent({ shareId }: { shareId: string }) {
   }
 
   const data = share.data;
+  const showPerformanceHint = data.snapshot.messages.length > 20;
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100">
-      <header className="border-b border-neutral-800/80 bg-neutral-950/90 backdrop-blur">
+    <main className="min-h-screen bg-neutral-900 text-neutral-100">
+      <header className="border-b border-neutral-800/80 bg-neutral-900/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
             <Image
@@ -99,6 +99,12 @@ async function SharePageContent({ shareId }: { shareId: string }) {
         </div>
       </header>
       <div className="mx-auto w-full max-w-3xl px-6 py-8">
+        {showPerformanceHint ? (
+          <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            内容较多，页面已启用流畅浏览优化。
+          </div>
+        ) : null}
+
         <section className="mb-8">
           <h1 className="text-xl font-semibold leading-8 text-white md:text-2xl">{data.title}</h1>
           <div className="mt-4 flex items-center gap-3">
@@ -122,26 +128,9 @@ async function SharePageContent({ shareId }: { shareId: string }) {
           </div>
         </section>
 
-        <article className="space-y-8">
-          {data.snapshot.messages.map((message) => (
-            <section
-              key={message.id}
-              className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
-            >
-              <div
-                className={cn(
-                  message.role === "user"
-                    ? "w-[80%] min-w-[16rem] rounded-2xl border border-neutral-700/10 bg-neutral-800/85 px-4 py-3 md:w-[72%] lg:w-[64%]"
-                    : "w-full",
-                )}
-              >
-                <ShareMarkdown content={message.content} />
-              </div>
-            </section>
-          ))}
-        </article>
+        <ShareMessageFeed messages={data.snapshot.messages} />
 
-        <footer className="mt-10 space-y-3 border-t border-neutral-800/80 pt-6 text-xs text-neutral-400">
+        <footer className="mt-8 space-y-3 border-t border-white/25 pt-4 text-xs text-neutral-400">
           <p>
             ChatKeep helps users preserve AI conversations. Shared content is provided by the author
             and may include personal information.

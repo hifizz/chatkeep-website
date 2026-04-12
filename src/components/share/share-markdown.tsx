@@ -26,7 +26,7 @@ const components: Components = {
     }
 
     return (
-      <code className={cn("block text-sm", className)} {...props}>
+      <code className={cn("block text-base", className)} {...props}>
         {children}
       </code>
     );
@@ -43,7 +43,7 @@ const components: Components = {
   ),
   table: ({ children, ...props }) => (
     <div className="overflow-x-auto">
-      <table {...props} className={cn("my-0 w-full text-sm", props.className)}>
+      <table {...props} className={cn("my-0 w-full text-base", props.className)}>
         {children}
       </table>
     </div>
@@ -54,7 +54,7 @@ export function ShareMarkdown({ content, className }: ShareMarkdownProps) {
   return (
     <div
       className={cn(
-        "prose prose-sm prose-invert max-w-none",
+        "prose prose-base prose-invert max-w-none",
         "prose-headings:text-neutral-100 prose-p:text-neutral-100 prose-strong:text-neutral-50",
         "prose-code:text-neutral-100 prose-pre:bg-transparent",
         "prose-th:border prose-th:border-neutral-700 prose-th:bg-neutral-900/70",
