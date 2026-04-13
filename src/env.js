@@ -23,6 +23,7 @@ export const env = createEnv({
     PAST_DUE_GRACE_DAYS: z.coerce.number().int().min(0).optional(),
     RELEASE_SYNC_SECRET: z.string().optional(),
     RELEASE_SYNC_ALLOWED_REPO: z.string().optional(),
+    RELEASE_DISPLAY_CHANNEL: z.enum(["dev", "stable"]).optional(),
   },
 
   /**
@@ -56,6 +57,7 @@ export const env = createEnv({
     PAST_DUE_GRACE_DAYS: process.env.PAST_DUE_GRACE_DAYS,
     RELEASE_SYNC_SECRET: process.env.RELEASE_SYNC_SECRET,
     RELEASE_SYNC_ALLOWED_REPO: process.env.RELEASE_SYNC_ALLOWED_REPO,
+    RELEASE_DISPLAY_CHANNEL: process.env.RELEASE_DISPLAY_CHANNEL,
     NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
     NEXT_PUBLIC_CLARITY_ID: process.env.NEXT_PUBLIC_CLARITY_ID,
   },

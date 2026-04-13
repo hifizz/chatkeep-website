@@ -7,6 +7,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { HeroImage } from "~/components/marketing/hero-image";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { FeatureImageDialog } from "~/components/marketing/feature-image-dialog";
+import { env } from "~/env";
+import { getChannelLatest } from "~/server/release/release-service";
 
 const features = [
   {
@@ -86,7 +88,13 @@ const aiPlatforms = [
   { name: "Grok", icon: Grok, status: "available" },
 ];
 
-function InstallChromeButton() {
+async function InstallChromeButton() {
+  const displayChannel = env.RELEASE_DISPLAY_CHANNEL === "dev" ? "dev" : "stable";
+  const latestRelease = await getChannelLatest(displayChannel);
+  const chromeArtifact = latestRelease?.artifacts.find((artifact) => artifact.browser === "chrome");
+  const manualInstallLabel =
+    displayChannel === "dev" ? "Manual Install (Beta Chrome)" : "Manual Install (Chrome ZIP)";
+
   return (
     <div className="flex items-center rounded-full bg-white p-3 shadow-lg transition hover:bg-neutral-200 hover:scale-105">
       <Link
@@ -124,10 +132,29 @@ function InstallChromeButton() {
               ))}
           </div>
           <div className="my-2 h-px bg-neutral-800" />
-          <div className="flex cursor-not-allowed items-center gap-3 rounded-md px-2 py-2 text-sm opacity-50">
-            <Icon icon="lucide:download" width={16} height={16} />
-            <span>Manual Install (Soon)</span>
-          </div>
+          {chromeArtifact ? (
+            <a
+              href={chromeArtifact.downloadUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors hover:bg-neutral-800 hover:text-white"
+            >
+              <Icon icon="lucide:download" width={16} height={16} />
+              <span>{manualInstallLabel}</span>
+            </a>
+          ) : (
+            <div className="flex cursor-not-allowed items-center gap-3 rounded-md px-2 py-2 text-sm opacity-50">
+              <Icon icon="lucide:download" width={16} height={16} />
+              <span>Manual Install (Preparing)</span>
+            </div>
+          )}
+          <Link
+            href="/install/beta"
+            className="mt-1 flex items-center gap-3 rounded-md px-2 py-2 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white"
+          >
+            <Icon icon="lucide:book-open-text" width={16} height={16} />
+            <span>Beta Install Guide</span>
+          </Link>
         </HoverCardContent>
       </HoverCard>
     </div>
