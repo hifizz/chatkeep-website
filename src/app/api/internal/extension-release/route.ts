@@ -53,7 +53,9 @@ export async function POST(request: NextRequest) {
   try {
     const synced = await syncExtensionRelease(payload);
 
+    revalidatePath("/");
     revalidatePath("/install");
+    revalidatePath("/install/beta");
     revalidatePath("/changelog");
 
     console.info("[release-sync] accepted", {
