@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
@@ -161,6 +162,25 @@ async function InstallChromeButton() {
   );
 }
 
+function InstallChromeButtonFallback() {
+  return (
+    <div className="flex items-center rounded-full bg-white p-3 shadow-lg opacity-90">
+      <Link
+        href="/install"
+        className="flex items-center justify-center gap-2 text-base font-bold text-neutral-950"
+      >
+        <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
+        <span>Install for Chrome</span>
+      </Link>
+      <div className="mx-3 h-6 w-px bg-neutral-300" />
+      <div className="flex items-center gap-2 text-sm text-neutral-500">
+        <Icon icon="lucide:loader-circle" width={16} height={16} className="animate-spin" />
+        <span>Loading...</span>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <MarketingShell brandBadge="Beta">
@@ -179,7 +199,9 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <InstallChromeButton />
+            <Suspense fallback={<InstallChromeButtonFallback />}>
+              <InstallChromeButton />
+            </Suspense>
             <Link
               href="#features"
               className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
