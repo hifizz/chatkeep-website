@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { getChannelLatest } from "~/server/release/release-service";
@@ -25,10 +26,38 @@ const installSteps = [
   },
 ];
 
-export default async function BetaInstallGuidePage() {
+async function LatestBetaDownloadSection() {
   const betaRelease = await getChannelLatest("dev");
   const chromeArtifact = betaRelease?.artifacts.find((artifact) => artifact.browser === "chrome");
 
+  return (
+    <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-white">最新 Beta 下载</h2>
+      {chromeArtifact ? (
+        <div className="space-y-3">
+          <p className="text-sm text-neutral-400">
+            当前版本：{betaRelease?.version}
+            {betaRelease?.tag ? ` (${betaRelease.tag})` : ""}
+          </p>
+          <a
+            href={chromeArtifact.downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+          >
+            下载 Beta Chrome ZIP
+          </a>
+        </div>
+      ) : (
+        <p className="text-sm text-neutral-400">
+          暂未检测到 Beta Chrome 安装包，请先完成一次 dev 渠道发布。
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function BetaInstallGuidePage() {
   return (
     <MarketingShell>
       <section className="mx-auto flex max-w-4xl flex-col gap-8 px-6 pb-16 pt-12">
@@ -43,29 +72,16 @@ export default async function BetaInstallGuidePage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-white">最新 Beta 下载</h2>
-          {chromeArtifact ? (
-            <div className="space-y-3">
-              <p className="text-sm text-neutral-400">
-                当前版本：{betaRelease?.version}
-                {betaRelease?.tag ? ` (${betaRelease.tag})` : ""}
-              </p>
-              <a
-                href={chromeArtifact.downloadUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
-              >
-                下载 Beta Chrome ZIP
-              </a>
+        <Suspense
+          fallback={
+            <div className="rounded-3xl border border-neutral-800 bg-neutral-900/50 p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-white">最新 Beta 下载</h2>
+              <p className="text-sm text-neutral-400">正在加载最新 Beta 发布信息...</p>
             </div>
-          ) : (
-            <p className="text-sm text-neutral-400">
-              暂未检测到 Beta Chrome 安装包，请先完成一次 dev 渠道发布。
-            </p>
-          )}
-        </div>
+          }
+        >
+          <LatestBetaDownloadSection />
+        </Suspense>
 
         <div className="grid gap-4 md:grid-cols-2">
           {installSteps.map((step) => (
