@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
@@ -6,10 +5,7 @@ import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { Claude, DeepSeek, Gemini, OpenAI, Grok } from "@lobehub/icons";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { HeroImage } from "~/components/marketing/hero-image";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "~/components/ui/hover-card";
 import { FeatureImageDialog } from "~/components/marketing/feature-image-dialog";
-import { env } from "~/env";
-import { getChannelLatest } from "~/server/release/release-service";
 
 const features = [
   {
@@ -73,14 +69,6 @@ const useCases = [
   },
 ];
 
-const browsers = [
-  { name: "Chrome", icon: "logos:chrome" },
-  { name: "Firefox", icon: "logos:firefox" },
-  { name: "Safari", icon: "logos:safari" },
-  { name: "Edge", icon: "logos:microsoft-edge" },
-  { name: "Brave", icon: "logos:brave" },
-];
-
 const aiPlatforms = [
   { name: "Gemini", icon: Gemini.Color, status: "available" },
   { name: "ChatGPT", icon: OpenAI, status: "available" },
@@ -89,15 +77,9 @@ const aiPlatforms = [
   { name: "Grok", icon: Grok, status: "available" },
 ];
 
-async function InstallChromeButton() {
-  const displayChannel = env.RELEASE_DISPLAY_CHANNEL === "dev" ? "dev" : "stable";
-  const latestRelease = await getChannelLatest(displayChannel);
-  const chromeArtifact = latestRelease?.artifacts.find((artifact) => artifact.browser === "chrome");
-  const manualInstallLabel =
-    displayChannel === "dev" ? "Manual Install (Beta Chrome)" : "Manual Install (Chrome ZIP)";
-
+function InstallChromeButton() {
   return (
-    <div className="flex items-center rounded-full bg-white p-3 shadow-lg transition hover:bg-neutral-200 hover:scale-105">
+    <div className="flex items-center rounded-full bg-white p-3 shadow-lg">
       <Link
         href="/install"
         className="flex items-center justify-center gap-2 text-base font-bold text-neutral-950"
@@ -105,78 +87,6 @@ async function InstallChromeButton() {
         <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
         <span>Install for Chrome</span>
       </Link>
-      <div className="mx-3 h-6 w-px bg-neutral-300" />
-      <HoverCard openDelay={0} closeDelay={150}>
-        <HoverCardTrigger asChild>
-          <button type="button" className="text-neutral-500 focus:outline-none">
-            <Icon icon="lucide:chevron-down" width={20} height={20} />
-          </button>
-        </HoverCardTrigger>
-        <HoverCardContent
-          align="end"
-          className="w-56 border-neutral-800 bg-neutral-900 p-2 text-neutral-200 shadow-xl"
-        >
-          <div className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-500">
-            Other Browsers
-          </div>
-          <div className="space-y-1">
-            {browsers
-              .filter((b) => b.name !== "Chrome")
-              .map((b) => (
-                <div
-                  key={b.name}
-                  className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors hover:bg-neutral-800 hover:text-white"
-                >
-                  <Icon icon={b.icon} width={16} height={16} />
-                  <span>{b.name}</span>
-                </div>
-              ))}
-          </div>
-          <div className="my-2 h-px bg-neutral-800" />
-          {chromeArtifact ? (
-            <a
-              href={chromeArtifact.downloadUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors hover:bg-neutral-800 hover:text-white"
-            >
-              <Icon icon="lucide:download" width={16} height={16} />
-              <span>{manualInstallLabel}</span>
-            </a>
-          ) : (
-            <div className="flex cursor-not-allowed items-center gap-3 rounded-md px-2 py-2 text-sm opacity-50">
-              <Icon icon="lucide:download" width={16} height={16} />
-              <span>Manual Install (Preparing)</span>
-            </div>
-          )}
-          <Link
-            href="/install/beta"
-            className="mt-1 flex items-center gap-3 rounded-md px-2 py-2 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white"
-          >
-            <Icon icon="lucide:book-open-text" width={16} height={16} />
-            <span>Beta Install Guide</span>
-          </Link>
-        </HoverCardContent>
-      </HoverCard>
-    </div>
-  );
-}
-
-function InstallChromeButtonFallback() {
-  return (
-    <div className="flex items-center rounded-full bg-white p-3 shadow-lg opacity-90">
-      <Link
-        href="/install"
-        className="flex items-center justify-center gap-2 text-base font-bold text-neutral-950"
-      >
-        <Icon icon="logos:chrome" width={28} height={28} aria-hidden="true" className="shrink-0" />
-        <span>Install for Chrome</span>
-      </Link>
-      <div className="mx-3 h-6 w-px bg-neutral-300" />
-      <div className="flex items-center gap-2 text-sm text-neutral-500">
-        <Icon icon="lucide:loader-circle" width={16} height={16} className="animate-spin" />
-        <span>Loading...</span>
-      </div>
     </div>
   );
 }
@@ -199,14 +109,12 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Suspense fallback={<InstallChromeButtonFallback />}>
-              <InstallChromeButton />
-            </Suspense>
+            <InstallChromeButton />
             <Link
-              href="#features"
-              className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800 hover:scale-105"
+              href="/install#other-browsers"
+              className="inline-flex items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/50 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800"
             >
-              See features
+              Install for Other Browsers
             </Link>
           </div>
 
