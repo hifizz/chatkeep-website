@@ -98,7 +98,7 @@ export default function HomePage() {
       <section className="relative mx-auto max-w-6xl px-6 pt-12 pb-16 text-center animate-rise overflow-visible md:pt-20">
         <div className="flex flex-col items-center gap-6">
           <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl">
-            Chat smarter. <br className="hidden md:block" />
+            Chat smarter. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-400 to-teal-500">
               Keep everything.
             </span>
