@@ -191,6 +191,43 @@ describe("rpc share endpoints", () => {
     });
   });
 
+  it("accepts yuanbao platform in share snapshot payload", async () => {
+    vi.mocked(createShare).mockResolvedValue({
+      shareId: "share-yuanbao",
+      shareUrl: "http://localhost:3030/s/share-yuanbao",
+      accessMode: "public",
+      expiresAt: null,
+      status: "active",
+    });
+
+    const res = await postJson("/api/rpc/share/create", {
+      source: "content",
+      chatUrl: "https://yuanbao.tencent.com/chat/naQivTmsDa/c41d091b-8ec9-4130-854d-5bd970bc127f",
+      accessMode: "public",
+      expiryMode: "permanent",
+      disclosureConfirmed: true,
+      snapshot: {
+        schemaVersion: 1,
+        title: "Yuanbao Demo",
+        sourceUrl:
+          "https://yuanbao.tencent.com/chat/naQivTmsDa/c41d091b-8ec9-4130-854d-5bd970bc127f",
+        platform: "yuanbao",
+        exportedAt: "2026-04-18T00:00:00.000Z",
+        messages: [{ id: "m1", role: "assistant", content: "hello from yuanbao" }],
+      },
+    });
+
+    expect(res.status).toBe(200);
+    expect(createShare).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({
+        snapshot: expect.objectContaining({
+          platform: "yuanbao",
+        }),
+      }),
+    );
+  });
+
   it("handles share list", async () => {
     vi.mocked(listShares).mockResolvedValue({
       items: [

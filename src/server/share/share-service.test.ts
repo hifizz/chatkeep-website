@@ -95,6 +95,33 @@ describe("createShare", () => {
       }),
     ).rejects.toThrow("Snapshot too large");
   });
+
+  it("persists yuanbao platform as sourcePlatform", async () => {
+    vi.mocked(repo.insertShare).mockResolvedValue(buildRecord({ sourcePlatform: "yuanbao" }));
+
+    await createShare("user-1", {
+      source: "content",
+      chatUrl: "https://yuanbao.tencent.com/chat/naQivTmsDa/c41d091b-8ec9-4130-854d-5bd970bc127f",
+      expiryMode: "permanent",
+      accessMode: "public",
+      disclosureConfirmed: true,
+      snapshot: {
+        schemaVersion: 1,
+        title: "Yuanbao Chat",
+        sourceUrl:
+          "https://yuanbao.tencent.com/chat/naQivTmsDa/c41d091b-8ec9-4130-854d-5bd970bc127f",
+        platform: "yuanbao",
+        exportedAt: "2026-04-18T00:00:00.000Z",
+        messages: [{ id: "m1", role: "assistant", content: "hello from yuanbao" }],
+      },
+    });
+
+    expect(repo.insertShare).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourcePlatform: "yuanbao",
+      }),
+    );
+  });
 });
 
 describe("public render and password verification", () => {

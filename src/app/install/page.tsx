@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketingShell } from "~/components/marketing/marketing-shell";
 import { getChannelLatest } from "~/server/release/release-service";
 import type { BrowserTarget } from "~/types/release-sync";
+import { SUPPORTED_AI_PLATFORMS_TEXT } from "~/lib/platform-support";
 
 const steps = [
   {
@@ -11,8 +12,7 @@ const steps = [
   },
   {
     title: "Open your chat platform",
-    description:
-      "Use Gemini, ChatGPT, DeepSeek, or Grok, and ChatKeep will save each conversation locally.",
+    description: `Use ${SUPPORTED_AI_PLATFORMS_TEXT}, and ChatKeep will save each conversation locally.`,
   },
   {
     title: "Organize as you chat",
@@ -144,8 +144,8 @@ export default function InstallPage() {
           </p>
           <h1 className="font-display text-4xl text-white">Install ChatKeep in under a minute.</h1>
           <p className="text-sm text-neutral-400">
-            ChatKeep runs locally in your browser and currently supports Gemini, ChatGPT, DeepSeek,
-            and Grok.
+            ChatKeep runs locally in your browser and currently supports{" "}
+            {SUPPORTED_AI_PLATFORMS_TEXT}.
           </p>
         </div>
 

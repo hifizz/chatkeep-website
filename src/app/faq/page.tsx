@@ -1,4 +1,5 @@
 import { MarketingShell } from "~/components/marketing/marketing-shell";
+import { SUPPORTED_AI_PLATFORMS_TEXT } from "~/lib/platform-support";
 
 const faqs = [
   {
@@ -12,7 +13,7 @@ const faqs = [
   },
   {
     question: "Which platforms are supported?",
-    answer: "ChatKeep currently supports Gemini, ChatGPT, DeepSeek, and Grok.",
+    answer: `ChatKeep currently supports ${SUPPORTED_AI_PLATFORMS_TEXT}.`,
   },
   {
     question: "Can I export conversations?",

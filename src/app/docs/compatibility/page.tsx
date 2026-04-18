@@ -1,11 +1,7 @@
 import { MarketingShell } from "~/components/marketing/marketing-shell";
+import { SUPPORTED_AI_PLATFORMS } from "~/lib/platform-support";
 
-const aiPlatforms = [
-  { name: "Gemini", status: "Supported" },
-  { name: "ChatGPT", status: "Supported" },
-  { name: "DeepSeek", status: "Supported" },
-  { name: "Grok", status: "Supported" },
-];
+const aiPlatforms = SUPPORTED_AI_PLATFORMS.map((name) => ({ name, status: "Supported" }));
 
 const browsers = [
   { name: "Chrome", status: "Supported" },

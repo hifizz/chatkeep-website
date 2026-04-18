@@ -3,11 +3,11 @@ import "~/styles/globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { SUPPORTED_AI_PLATFORMS_TEXT } from "~/lib/platform-support";
 
 export const metadata: Metadata = {
   title: "ChatKeep – The Missing OS for AI Chats",
-  description:
-    "Aggregate, highlight, search, and export AI conversations locally. Supports Gemini, ChatGPT, DeepSeek, and Grok.",
+  description: `Aggregate, highlight, search, and export AI conversations locally. Supports ${SUPPORTED_AI_PLATFORMS_TEXT}.`,
   keywords: [
     "ai chat manager",
     "save gemini chats",
