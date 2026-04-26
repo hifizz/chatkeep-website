@@ -144,6 +144,77 @@ describe("rpc sync endpoints", () => {
     expect(await res.json()).toEqual(response);
     expect(clearSyncRecords).toHaveBeenCalledWith({ userId: "user-1" });
   });
+
+  it("returns 500 when pullSyncRecords throws", async () => {
+    vi.mocked(pullSyncRecords).mockRejectedValue(new Error("db error"));
+
+    const res = await postJson("/api/rpc/sync/pull", { deviceId: "device-1" });
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
+  });
+
+  it("returns 500 when pushSyncRecords throws", async () => {
+    vi.mocked(pushSyncRecords).mockRejectedValue(new Error("db error"));
+
+    const res = await postJson("/api/rpc/sync/push", {
+      deviceId: "device-1",
+      records: [
+        {
+          recordId: "record-1",
+          recordType: "chat",
+          payload: '{"message":"hi"}',
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
+  });
+
+  it("returns 500 when clearSyncRecords throws", async () => {
+    vi.mocked(clearSyncRecords).mockRejectedValue(new Error("db error"));
+
+    const res = await postJson("/api/rpc/sync/clear", { deviceId: "device-1" });
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
+  });
+
+  it("returns 400 when records array exceeds 200 items", async () => {
+    const records = Array.from({ length: 201 }, (_, i) => ({
+      recordId: `record-${i}`,
+      recordType: "chat" as const,
+      payload: "{}",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    }));
+
+    const res = await postJson("/api/rpc/sync/push", {
+      deviceId: "device-1",
+      records,
+    });
+
+    expect(res.status).toBe(400);
+    expect(pushSyncRecords).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when a record payload exceeds 5 MB", async () => {
+    const res = await postJson("/api/rpc/sync/push", {
+      deviceId: "device-1",
+      records: [
+        {
+          recordId: "record-oversized",
+          recordType: "chat",
+          payload: "x".repeat(5_000_001),
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(res.status).toBe(400);
+    expect(pushSyncRecords).not.toHaveBeenCalled();
+  });
 });
 
 describe("rpc share endpoints", () => {

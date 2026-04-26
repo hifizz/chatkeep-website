@@ -130,7 +130,7 @@ const CheckoutSchema = z.object({
 const SyncRecordSchema = z.object({
   recordId: z.string().min(1),
   recordType: z.enum(["chat", "note"]),
-  payload: z.string(),
+  payload: z.string().max(5_000_000),
   updatedAt: z.string().datetime(),
   deletedAt: z.string().datetime().optional(),
   // push 可选透传，服务端以自身分配为准。
@@ -144,7 +144,7 @@ const SyncPullSchema = z.object({
 
 const SyncPushSchema = z.object({
   deviceId: z.string().min(1),
-  records: z.array(SyncRecordSchema),
+  records: z.array(SyncRecordSchema).max(200),
 });
 
 const SyncClearSchema = z.object({
@@ -234,12 +234,15 @@ const routes = app
     const session = c.get("session");
     const input = c.req.valid("json") as SyncPullRequestDTO;
 
-    const response = await pullSyncRecords({
-      userId: session.user.id,
-      since: input.since,
-    });
-
-    return c.json(response);
+    try {
+      const response = await pullSyncRecords({
+        userId: session.user.id,
+        since: input.since,
+      });
+      return c.json(response);
+    } catch {
+      return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
+    }
   })
   .post("/rpc/sync/push", requireSession, zValidator("json", SyncPushSchema), async (c) => {
     const session = c.get("session");
@@ -250,22 +253,28 @@ const routes = app
     // - skipped: 合法 no-op 条数（幂等冲突）
     // - rejected: 被拒绝处理条数
     // 强约束：accepted + skipped + rejected === input.records.length
-    const response = await pushSyncRecords({
-      userId: session.user.id,
-      records: input.records,
-    });
-
-    return c.json(response);
+    try {
+      const response = await pushSyncRecords({
+        userId: session.user.id,
+        records: input.records,
+      });
+      return c.json(response);
+    } catch {
+      return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
+    }
   })
   .post("/rpc/sync/clear", requireSession, zValidator("json", SyncClearSchema), async (c) => {
     const session = c.get("session");
     const _input = c.req.valid("json") as SyncClearRequestDTO;
 
-    const response = await clearSyncRecords({
-      userId: session.user.id,
-    });
-
-    return c.json(response);
+    try {
+      const response = await clearSyncRecords({
+        userId: session.user.id,
+      });
+      return c.json(response);
+    } catch {
+      return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
+    }
   })
   .post(
     "/rpc/share/create",
