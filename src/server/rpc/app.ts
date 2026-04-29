@@ -140,15 +140,18 @@ const SyncRecordSchema = z.object({
 const SyncPullSchema = z.object({
   since: z.string().datetime().optional(),
   deviceId: z.string().min(1),
+  syncVersion: z.literal("sync-v2"),
 });
 
 const SyncPushSchema = z.object({
   deviceId: z.string().min(1),
+  syncVersion: z.literal("sync-v2"),
   records: z.array(SyncRecordSchema).max(200),
 });
 
 const SyncClearSchema = z.object({
   deviceId: z.string().min(1),
+  syncVersion: z.literal("sync-v2"),
 });
 
 const ShareMessageSchema = z.object({

@@ -17,16 +17,25 @@ export type SyncRecordDTO = {
 export type SyncPullRequestDTO = {
   since?: string;
   deviceId: string;
+  syncVersion: "sync-v2";
 };
 
 export type SyncPullResponseDTO = {
   serverTime: string;
   records: SyncRecordDTO[];
+  syncEpoch: string;
 };
 
 export type SyncPushRequestDTO = {
   deviceId: string;
   records: SyncRecordDTO[];
+  syncVersion: "sync-v2";
+};
+
+export type SyncAcceptedRecordDTO = {
+  recordId: string;
+  recordType: SyncRecordType;
+  serverOrder: number;
 };
 
 export type SyncPushResponseDTO = {
@@ -46,10 +55,16 @@ export type SyncPushResponseDTO = {
    * 这类记录不应写入数据库，通常由单条记录语义无效或不可处理导致。
    */
   rejected: number;
+  /**
+   * acceptedRecords: 本批次实际写入记录对应的服务端权威序号。
+   * 客户端应据此回写本地 serverOrder，确保多端最终顺序一致。
+   */
+  acceptedRecords: SyncAcceptedRecordDTO[];
 };
 
 export type SyncClearRequestDTO = {
   deviceId: string;
+  syncVersion: "sync-v2";
 };
 
 export type SyncClearResponseDTO = {

@@ -145,6 +145,22 @@ export const syncRecord = createTable(
   ],
 );
 
+export const syncUserState = createTable(
+  "sync_user_state",
+  (_d) => ({
+    userId: text("user_id")
+      .primaryKey()
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    epoch: text("epoch").notNull(),
+    lastServerOrder: bigint("last_server_order", { mode: "number" }).notNull().default(0),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [index("sync_user_state_updated_at_idx").on(t.updatedAt)],
+);
+
 export const billingWebhookEvent = createTable(
   "billing_webhook_event",
   () => ({

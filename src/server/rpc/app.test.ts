@@ -74,7 +74,10 @@ describe("rpc sync endpoints", () => {
   it("returns 401 when session is missing", async () => {
     vi.mocked(auth.api.getSession).mockResolvedValue(null);
 
-    const res = await postJson("/api/rpc/sync/pull", { deviceId: "device-1" });
+    const res = await postJson("/api/rpc/sync/pull", {
+      deviceId: "device-1",
+      syncVersion: "sync-v2",
+    });
 
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized", code: "UNAUTHORIZED" });
@@ -82,12 +85,13 @@ describe("rpc sync endpoints", () => {
   });
 
   it("handles pull requests", async () => {
-    const response = { serverTime: "2025-01-01T00:00:00.000Z", records: [] };
+    const response = { serverTime: "2025-01-01T00:00:00.000Z", records: [], syncEpoch: "epoch-1" };
     vi.mocked(pullSyncRecords).mockResolvedValue(response);
 
     const res = await postJson("/api/rpc/sync/pull", {
       deviceId: "device-1",
       since: "2025-01-01T00:00:00.000Z",
+      syncVersion: "sync-v2",
     });
 
     expect(res.status).toBe(200);
@@ -104,11 +108,13 @@ describe("rpc sync endpoints", () => {
       accepted: 1,
       skipped: 0,
       rejected: 0,
+      acceptedRecords: [{ recordType: "chat", recordId: "record-1", serverOrder: 1 }],
     };
     vi.mocked(pushSyncRecords).mockResolvedValue(response);
 
     const res = await postJson("/api/rpc/sync/push", {
       deviceId: "device-1",
+      syncVersion: "sync-v2",
       records: [
         {
           recordId: "record-1",
@@ -138,7 +144,10 @@ describe("rpc sync endpoints", () => {
     const response = { serverTime: "2025-01-01T00:00:00.000Z", deleted: 2 };
     vi.mocked(clearSyncRecords).mockResolvedValue(response);
 
-    const res = await postJson("/api/rpc/sync/clear", { deviceId: "device-1" });
+    const res = await postJson("/api/rpc/sync/clear", {
+      deviceId: "device-1",
+      syncVersion: "sync-v2",
+    });
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(response);
@@ -148,7 +157,10 @@ describe("rpc sync endpoints", () => {
   it("returns 500 when pullSyncRecords throws", async () => {
     vi.mocked(pullSyncRecords).mockRejectedValue(new Error("db error"));
 
-    const res = await postJson("/api/rpc/sync/pull", { deviceId: "device-1" });
+    const res = await postJson("/api/rpc/sync/pull", {
+      deviceId: "device-1",
+      syncVersion: "sync-v2",
+    });
 
     expect(res.status).toBe(500);
     expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
@@ -159,6 +171,7 @@ describe("rpc sync endpoints", () => {
 
     const res = await postJson("/api/rpc/sync/push", {
       deviceId: "device-1",
+      syncVersion: "sync-v2",
       records: [
         {
           recordId: "record-1",
@@ -176,7 +189,10 @@ describe("rpc sync endpoints", () => {
   it("returns 500 when clearSyncRecords throws", async () => {
     vi.mocked(clearSyncRecords).mockRejectedValue(new Error("db error"));
 
-    const res = await postJson("/api/rpc/sync/clear", { deviceId: "device-1" });
+    const res = await postJson("/api/rpc/sync/clear", {
+      deviceId: "device-1",
+      syncVersion: "sync-v2",
+    });
 
     expect(res.status).toBe(500);
     expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
@@ -192,6 +208,7 @@ describe("rpc sync endpoints", () => {
 
     const res = await postJson("/api/rpc/sync/push", {
       deviceId: "device-1",
+      syncVersion: "sync-v2",
       records,
     });
 
@@ -202,6 +219,7 @@ describe("rpc sync endpoints", () => {
   it("returns 400 when a record payload exceeds 5 MB", async () => {
     const res = await postJson("/api/rpc/sync/push", {
       deviceId: "device-1",
+      syncVersion: "sync-v2",
       records: [
         {
           recordId: "record-oversized",
@@ -214,6 +232,13 @@ describe("rpc sync endpoints", () => {
 
     expect(res.status).toBe(400);
     expect(pushSyncRecords).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when syncVersion is missing", async () => {
+    const res = await postJson("/api/rpc/sync/pull", { deviceId: "device-1" });
+
+    expect(res.status).toBe(400);
+    expect(pullSyncRecords).not.toHaveBeenCalled();
   });
 });
 
