@@ -1,5 +1,23 @@
 export type SyncRecordType = "chat" | "note";
 
+export type SyncPolicyErrorCode = "SYNC_DISABLED" | "SYNC_CONSENT_REQUIRED";
+
+export type SyncPolicySettingsDTO = {
+  enabled: boolean;
+  consentedAt?: string;
+  updatedAt?: string;
+};
+
+export type SyncSettingsGetRequestDTO = Record<string, never>;
+export type SyncSettingsGetResponseDTO = SyncPolicySettingsDTO;
+
+export type SyncSettingsUpdateRequestDTO = {
+  enabled?: boolean;
+  consentedAt?: string;
+};
+
+export type SyncSettingsUpdateResponseDTO = SyncPolicySettingsDTO;
+
 export type SyncRecordDTO = {
   recordId: string;
   recordType: SyncRecordType;

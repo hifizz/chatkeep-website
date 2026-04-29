@@ -161,6 +161,22 @@ export const syncUserState = createTable(
   (t) => [index("sync_user_state_updated_at_idx").on(t.updatedAt)],
 );
 
+export const syncUserSettings = createTable(
+  "sync_user_settings",
+  (_d) => ({
+    userId: text("user_id")
+      .primaryKey()
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    enabled: boolean("enabled").notNull().default(false),
+    consentedAt: timestamp("consented_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [index("sync_user_settings_updated_at_idx").on(t.updatedAt)],
+);
+
 export const billingWebhookEvent = createTable(
   "billing_webhook_event",
   () => ({

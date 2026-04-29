@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { app } from "~/server/rpc/app";
 import { auth } from "~/lib/auth";
 import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/sync/sync-service";
+import { SyncPolicyError } from "~/server/sync/sync-errors";
+import { getSyncUserSettings, updateSyncUserSettings } from "~/server/sync/sync-settings-service";
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createShare, listShares } from "~/server/share/share-service";
 
@@ -17,6 +19,11 @@ vi.mock("~/server/sync/sync-service", () => ({
   pullSyncRecords: vi.fn(),
   pushSyncRecords: vi.fn(),
   clearSyncRecords: vi.fn(),
+}));
+
+vi.mock("~/server/sync/sync-settings-service", () => ({
+  getSyncUserSettings: vi.fn(),
+  updateSyncUserSettings: vi.fn(),
 }));
 
 vi.mock("~/server/billing/profile-service", () => ({
@@ -108,7 +115,7 @@ describe("rpc sync endpoints", () => {
       accepted: 1,
       skipped: 0,
       rejected: 0,
-      acceptedRecords: [{ recordType: "chat", recordId: "record-1", serverOrder: 1 }],
+      acceptedRecords: [{ recordType: "chat" as const, recordId: "record-1", serverOrder: 1 }],
     };
     vi.mocked(pushSyncRecords).mockResolvedValue(response);
 
@@ -156,7 +163,6 @@ describe("rpc sync endpoints", () => {
 
   it("returns 500 when pullSyncRecords throws", async () => {
     vi.mocked(pullSyncRecords).mockRejectedValue(new Error("db error"));
-
     const res = await postJson("/api/rpc/sync/pull", {
       deviceId: "device-1",
       syncVersion: "sync-v2",
@@ -164,6 +170,21 @@ describe("rpc sync endpoints", () => {
 
     expect(res.status).toBe(500);
     expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
+  });
+
+  it("returns policy error when sync is disabled on pull", async () => {
+    vi.mocked(pullSyncRecords).mockRejectedValue(new SyncPolicyError("SYNC_DISABLED"));
+
+    const res = await postJson("/api/rpc/sync/pull", {
+      deviceId: "device-1",
+      syncVersion: "sync-v2",
+    });
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "Sync is disabled for this account",
+      code: "SYNC_DISABLED",
+    });
   });
 
   it("returns 500 when pushSyncRecords throws", async () => {
@@ -184,6 +205,29 @@ describe("rpc sync endpoints", () => {
 
     expect(res.status).toBe(500);
     expect(await res.json()).toMatchObject({ code: "INTERNAL_ERROR" });
+  });
+
+  it("returns policy error when sync consent is missing on push", async () => {
+    vi.mocked(pushSyncRecords).mockRejectedValue(new SyncPolicyError("SYNC_CONSENT_REQUIRED"));
+
+    const res = await postJson("/api/rpc/sync/push", {
+      deviceId: "device-1",
+      syncVersion: "sync-v2",
+      records: [
+        {
+          recordId: "record-1",
+          recordType: "chat",
+          payload: '{"message":"hi"}',
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "Sync consent is required for this account",
+      code: "SYNC_CONSENT_REQUIRED",
+    });
   });
 
   it("returns 500 when clearSyncRecords throws", async () => {
@@ -232,6 +276,49 @@ describe("rpc sync endpoints", () => {
 
     expect(res.status).toBe(400);
     expect(pushSyncRecords).not.toHaveBeenCalled();
+  });
+
+  it("returns default sync settings when no server row exists", async () => {
+    vi.mocked(getSyncUserSettings).mockResolvedValue({
+      enabled: false,
+    });
+
+    const res = await postJson("/api/rpc/sync/settings/get", {});
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ enabled: false });
+    expect(getSyncUserSettings).toHaveBeenCalledWith("user-1");
+  });
+
+  it("updates sync settings and returns unified account policy", async () => {
+    vi.mocked(updateSyncUserSettings).mockResolvedValue({
+      enabled: true,
+      consentedAt: "2026-04-29T00:00:00.000Z",
+      updatedAt: "2026-04-29T00:00:01.000Z",
+    });
+
+    const res = await postJson("/api/rpc/sync/settings/update", {
+      enabled: true,
+      consentedAt: "2026-04-29T00:00:00.000Z",
+    });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      enabled: true,
+      consentedAt: "2026-04-29T00:00:00.000Z",
+      updatedAt: "2026-04-29T00:00:01.000Z",
+    });
+    expect(updateSyncUserSettings).toHaveBeenCalledWith("user-1", {
+      enabled: true,
+      consentedAt: "2026-04-29T00:00:00.000Z",
+    });
+  });
+
+  it("returns 400 when sync settings update payload is empty", async () => {
+    const res = await postJson("/api/rpc/sync/settings/update", {});
+
+    expect(res.status).toBe(400);
+    expect(updateSyncUserSettings).not.toHaveBeenCalled();
   });
 
   it("returns 400 when syncVersion is missing", async () => {

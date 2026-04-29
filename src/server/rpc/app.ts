@@ -4,11 +4,19 @@ import type { MiddlewareHandler } from "hono";
 import { z } from "zod";
 import { auth } from "~/lib/auth";
 import type { AuthMeResponseDTO } from "~/types/auth";
-import type { SyncClearRequestDTO, SyncPullRequestDTO, SyncPushRequestDTO } from "~/types/sync";
+import type {
+  SyncClearRequestDTO,
+  SyncPullRequestDTO,
+  SyncPushRequestDTO,
+  SyncSettingsGetRequestDTO,
+  SyncSettingsUpdateRequestDTO,
+} from "~/types/sync";
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createCheckout } from "~/server/billing/billing-service";
 import type { CheckoutRequestDTO } from "~/lib/billing/types";
 import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/sync/sync-service";
+import { isSyncPolicyError } from "~/server/sync/sync-errors";
+import { getSyncUserSettings, updateSyncUserSettings } from "~/server/sync/sync-settings-service";
 import {
   createShare,
   deleteShareByOwner,
@@ -36,6 +44,8 @@ type RpcErrorCode =
   | "NOT_FOUND"
   | "EXPIRED_OR_REVOKED"
   | "RATE_LIMITED"
+  | "SYNC_DISABLED"
+  | "SYNC_CONSENT_REQUIRED"
   | "VALIDATION_ERROR"
   | "INTERNAL_ERROR";
 
@@ -143,6 +153,23 @@ const SyncPullSchema = z.object({
   syncVersion: z.literal("sync-v2"),
 });
 
+const SyncSettingsGetSchema = z.object({});
+
+const SyncSettingsUpdateSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    consentedAt: z.string().datetime().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (typeof value.enabled === "undefined" && typeof value.consentedAt === "undefined") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [],
+        message: "At least one field is required",
+      });
+    }
+  });
+
 const SyncPushSchema = z.object({
   deviceId: z.string().min(1),
   syncVersion: z.literal("sync-v2"),
@@ -243,7 +270,10 @@ const routes = app
         since: input.since,
       });
       return c.json(response);
-    } catch {
+    } catch (error) {
+      if (isSyncPolicyError(error)) {
+        return rpcError(c, { error: error.message, code: error.code }, 403);
+      }
       return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
     }
   })
@@ -262,10 +292,40 @@ const routes = app
         records: input.records,
       });
       return c.json(response);
-    } catch {
+    } catch (error) {
+      if (isSyncPolicyError(error)) {
+        return rpcError(c, { error: error.message, code: error.code }, 403);
+      }
       return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
     }
   })
+  .post(
+    "/rpc/sync/settings/get",
+    requireSession,
+    zValidator("json", SyncSettingsGetSchema),
+    async (c) => {
+      const session = c.get("session");
+      const _input = c.req.valid("json") as SyncSettingsGetRequestDTO;
+      const response = await getSyncUserSettings(session.user.id);
+      return c.json(response);
+    },
+  )
+  .post(
+    "/rpc/sync/settings/update",
+    requireSession,
+    zValidator("json", SyncSettingsUpdateSchema),
+    async (c) => {
+      const session = c.get("session");
+      const input = c.req.valid("json") as SyncSettingsUpdateRequestDTO;
+
+      try {
+        const response = await updateSyncUserSettings(session.user.id, input);
+        return c.json(response);
+      } catch {
+        return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
+      }
+    },
+  )
   .post("/rpc/sync/clear", requireSession, zValidator("json", SyncClearSchema), async (c) => {
     const session = c.get("session");
     const _input = c.req.valid("json") as SyncClearRequestDTO;
