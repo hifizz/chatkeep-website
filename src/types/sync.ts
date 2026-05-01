@@ -1,5 +1,7 @@
+/** 可同步记录的业务类型。 */
 export type SyncRecordType = "chat" | "note";
 
+/** 一条同步记录的标准结构。 */
 export type SyncRecordDTO = {
   recordId: string;
   recordType: SyncRecordType;
@@ -14,21 +16,25 @@ export type SyncRecordDTO = {
   serverOrder?: number;
 };
 
+/** Pull 请求参数。 */
 export type SyncPullRequestDTO = {
   since?: string;
   deviceId: string;
 };
 
+/** Pull 响应体。 */
 export type SyncPullResponseDTO = {
   serverTime: string;
   records: SyncRecordDTO[];
 };
 
+/** Push 请求参数。 */
 export type SyncPushRequestDTO = {
   deviceId: string;
   records: SyncRecordDTO[];
 };
 
+/** Push 响应体（含接收计数）。 */
 export type SyncPushResponseDTO = {
   serverTime: string;
   /**
@@ -48,11 +54,26 @@ export type SyncPushResponseDTO = {
   rejected: number;
 };
 
+/** Clear 请求参数。 */
 export type SyncClearRequestDTO = {
   deviceId: string;
 };
 
+/** Clear 响应体。 */
 export type SyncClearResponseDTO = {
   serverTime: string;
   deleted: number;
+};
+
+/** 同步策略更新请求。 */
+export type SyncSettingsUpdateRequestDTO = {
+  enabled?: boolean;
+  consentedAt?: string;
+};
+
+/** 同步策略更新响应。 */
+export type SyncSettingsUpdateResponseDTO = {
+  enabled: boolean;
+  consentedAt: string | null;
+  updatedAt: string | null;
 };

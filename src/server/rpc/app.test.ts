@@ -4,6 +4,10 @@ import { auth } from "~/lib/auth";
 import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/sync/sync-service";
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createShare, listShares } from "~/server/share/share-service";
+import {
+  getSyncSettingsForUser,
+  updateSyncSettingsForUser,
+} from "~/server/sync/sync-settings-service";
 
 vi.mock("~/lib/auth", () => ({
   auth: {
@@ -28,6 +32,11 @@ vi.mock("~/server/share/share-service", () => ({
   listShares: vi.fn(),
   revokeShareByOwner: vi.fn(),
   deleteShareByOwner: vi.fn(),
+}));
+
+vi.mock("~/server/sync/sync-settings-service", () => ({
+  getSyncSettingsForUser: vi.fn(),
+  updateSyncSettingsForUser: vi.fn(),
 }));
 
 const session: NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>> = {
@@ -67,6 +76,38 @@ beforeEach(() => {
   vi.mocked(getProfileForUser).mockResolvedValue({
     isPro: true,
     plan: null,
+  });
+  vi.mocked(getSyncSettingsForUser).mockResolvedValue({
+    enabled: false,
+    consentedAt: null,
+    updatedAt: null,
+  });
+});
+
+describe("rpc me endpoint", () => {
+  it("returns me payload with settings.sync", async () => {
+    vi.mocked(getSyncSettingsForUser).mockResolvedValue({
+      enabled: true,
+      consentedAt: "2026-04-30T00:00:00.000Z",
+      updatedAt: "2026-04-30T00:00:00.000Z",
+    });
+
+    const res = await app.request("/api/rpc/me");
+    const payload = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(payload).toMatchObject({
+      user: { id: "user-1" },
+      session: { id: "session-1" },
+      settings: {
+        sync: {
+          enabled: true,
+          consentedAt: "2026-04-30T00:00:00.000Z",
+          updatedAt: "2026-04-30T00:00:00.000Z",
+        },
+      },
+    });
+    expect(getSyncSettingsForUser).toHaveBeenCalledWith("user-1");
   });
 });
 
@@ -214,6 +255,53 @@ describe("rpc sync endpoints", () => {
 
     expect(res.status).toBe(400);
     expect(pushSyncRecords).not.toHaveBeenCalled();
+  });
+});
+
+describe("rpc sync settings endpoint", () => {
+  it("updates sync settings", async () => {
+    vi.mocked(updateSyncSettingsForUser).mockResolvedValue({
+      enabled: true,
+      consentedAt: "2026-04-30T00:00:00.000Z",
+      updatedAt: "2026-04-30T00:00:01.000Z",
+    });
+
+    const res = await postJson("/api/rpc/settings/sync/update", {
+      enabled: true,
+      consentedAt: "2026-04-30T00:00:00.000Z",
+    });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      enabled: true,
+      consentedAt: "2026-04-30T00:00:00.000Z",
+      updatedAt: "2026-04-30T00:00:01.000Z",
+    });
+    expect(updateSyncSettingsForUser).toHaveBeenCalledWith("user-1", {
+      enabled: true,
+      consentedAt: "2026-04-30T00:00:00.000Z",
+    });
+  });
+
+  it("returns 401 when session is missing", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValue(null);
+
+    const res = await postJson("/api/rpc/settings/sync/update", { enabled: true });
+
+    expect(res.status).toBe(401);
+    expect(updateSyncSettingsForUser).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when request body is invalid", async () => {
+    const res = await postJson("/api/rpc/settings/sync/update", {});
+
+    expect(res.status).toBe(400);
+    expect(updateSyncSettingsForUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects old update path", async () => {
+    const res = await postJson("/api/rpc/sync/settings/update", { enabled: true });
+    expect(res.status).toBe(404);
   });
 });
 

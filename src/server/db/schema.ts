@@ -51,6 +51,9 @@ export const user = createTable("user", {
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => new Date())
     .notNull(),
+  syncEnabled: boolean("sync_enabled").default(false).notNull(),
+  syncConsentedAt: timestamp("sync_consented_at", { withTimezone: true }),
+  syncUpdatedAt: timestamp("sync_updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const session = createTable("session", {

@@ -4,11 +4,20 @@ import type { MiddlewareHandler } from "hono";
 import { z } from "zod";
 import { auth } from "~/lib/auth";
 import type { AuthMeResponseDTO } from "~/types/auth";
-import type { SyncClearRequestDTO, SyncPullRequestDTO, SyncPushRequestDTO } from "~/types/sync";
+import type {
+  SyncClearRequestDTO,
+  SyncPullRequestDTO,
+  SyncPushRequestDTO,
+  SyncSettingsUpdateRequestDTO,
+} from "~/types/sync";
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createCheckout } from "~/server/billing/billing-service";
 import type { CheckoutRequestDTO } from "~/lib/billing/types";
 import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/sync/sync-service";
+import {
+  getSyncSettingsForUser,
+  updateSyncSettingsForUser,
+} from "~/server/sync/sync-settings-service";
 import {
   createShare,
   deleteShareByOwner,
@@ -67,7 +76,10 @@ const mapShareError = (error: unknown) => {
 };
 
 async function toAuthMeResponse(session: SessionData): Promise<AuthMeResponseDTO> {
-  const profile = await getProfileForUser(session.user.id);
+  const [profile, syncSettings] = await Promise.all([
+    getProfileForUser(session.user.id),
+    getSyncSettingsForUser(session.user.id),
+  ]);
 
   return {
     user: {
@@ -81,6 +93,9 @@ async function toAuthMeResponse(session: SessionData): Promise<AuthMeResponseDTO
     session: {
       id: session.session.id,
       expiresAt: new Date(session.session.expiresAt).toISOString(),
+    },
+    settings: {
+      sync: syncSettings,
     },
   };
 }
@@ -150,6 +165,15 @@ const SyncPushSchema = z.object({
 const SyncClearSchema = z.object({
   deviceId: z.string().min(1),
 });
+
+const SyncSettingsUpdateSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    consentedAt: z.string().datetime().optional(),
+  })
+  .refine((value) => typeof value.enabled === "boolean" || typeof value.consentedAt === "string", {
+    message: "enabled or consentedAt is required",
+  });
 
 const ShareMessageSchema = z.object({
   id: z.string().min(1),
@@ -276,6 +300,22 @@ const routes = app
       return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
     }
   })
+  .post(
+    "/rpc/settings/sync/update",
+    requireSession,
+    zValidator("json", SyncSettingsUpdateSchema),
+    async (c) => {
+      const session = c.get("session");
+      const input = c.req.valid("json") as SyncSettingsUpdateRequestDTO;
+
+      try {
+        const response = await updateSyncSettingsForUser(session.user.id, input);
+        return c.json(response);
+      } catch {
+        return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
+      }
+    },
+  )
   .post(
     "/rpc/share/create",
     requireSession,
