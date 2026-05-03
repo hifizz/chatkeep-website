@@ -21,10 +21,21 @@ export default function PrivacyPage() {
             approximate location derived from IP, and session replay data from Clarity.
           </p>
 
-          <h2>What we do not collect</h2>
+          <h2>Local data and optional cloud sync</h2>
           <p>
-            We do not collect or upload your chat content. ChatKeep stores chat history locally in
-            your browser. Cloud sync is not available yet and will require opt-in when it launches.
+            ChatKeep is local-first by default. Your saved chats and notes stay in your browser
+            unless you sign in, review the sync privacy notice, and turn on cloud sync.
+          </p>
+          <p>
+            If you opt in to cloud sync, ChatKeep uploads the chats, notes, record identifiers,
+            timestamps, deletion markers, device identifiers, and sync metadata needed to keep your
+            signed-in devices aligned. Synced data is associated with your ChatKeep account so the
+            same account can read and update it across devices.
+          </p>
+          <p>
+            Turning cloud sync off stops future uploads and pulls for that account, but it does not
+            automatically delete data that was already synced. Use the clear cloud data action to
+            delete the cloud copy; your local browser data is not deleted by that action.
           </p>
 
           <h2>Payments</h2>

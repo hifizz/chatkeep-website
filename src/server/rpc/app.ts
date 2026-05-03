@@ -6,6 +6,7 @@ import { auth } from "~/lib/auth";
 import type { AuthMeResponseDTO } from "~/types/auth";
 import type {
   SyncClearRequestDTO,
+  SyncPolicyErrorCode,
   SyncPullRequestDTO,
   SyncPushRequestDTO,
   SyncSettingsUpdateRequestDTO,
@@ -46,7 +47,8 @@ type RpcErrorCode =
   | "EXPIRED_OR_REVOKED"
   | "RATE_LIMITED"
   | "VALIDATION_ERROR"
-  | "INTERNAL_ERROR";
+  | "INTERNAL_ERROR"
+  | SyncPolicyErrorCode;
 
 type RpcErrorPayload = {
   error: string;
@@ -74,6 +76,34 @@ const mapShareError = (error: unknown) => {
     } satisfies RpcErrorPayload,
   };
 };
+
+async function rejectDisallowedSyncPolicy(c: Parameters<MiddlewareHandler>[0], userId: string) {
+  const settings = await getSyncSettingsForUser(userId);
+
+  if (!settings.enabled) {
+    return rpcError(
+      c,
+      {
+        error: "Cloud sync is disabled",
+        code: "SYNC_DISABLED",
+      },
+      403,
+    );
+  }
+
+  if (!settings.consentedAt) {
+    return rpcError(
+      c,
+      {
+        error: "Cloud sync consent is required",
+        code: "SYNC_CONSENT_REQUIRED",
+      },
+      403,
+    );
+  }
+
+  return null;
+}
 
 async function toAuthMeResponse(session: SessionData): Promise<AuthMeResponseDTO> {
   const [profile, syncSettings] = await Promise.all([
@@ -259,6 +289,9 @@ const routes = app
     const input = c.req.valid("json") as SyncPullRequestDTO;
 
     try {
+      const policyError = await rejectDisallowedSyncPolicy(c, session.user.id);
+      if (policyError) return policyError;
+
       const response = await pullSyncRecords({
         userId: session.user.id,
         since: input.since,
@@ -278,6 +311,9 @@ const routes = app
     // - rejected: 被拒绝处理条数
     // 强约束：accepted + skipped + rejected === input.records.length
     try {
+      const policyError = await rejectDisallowedSyncPolicy(c, session.user.id);
+      if (policyError) return policyError;
+
       const response = await pushSyncRecords({
         userId: session.user.id,
         records: input.records,

@@ -14,6 +14,18 @@ export default function TermsPage() {
             change or evolve as we improve the product.
           </p>
 
+          <h2>Optional cloud sync</h2>
+          <p>
+            Cloud sync is optional. If you turn it on, you authorize ChatKeep to store and process
+            your synced chats, notes, and sync metadata so they can be available across devices
+            signed in to the same account. You are responsible for the content you choose to sync.
+          </p>
+          <p>
+            Cloud sync is not a permanent backup service. We work to keep synced data available, but
+            you should keep separate copies of important information. Turning sync off stops future
+            syncing; clearing cloud data deletes the cloud copy without deleting local browser data.
+          </p>
+
           <h2>Subscriptions and billing</h2>
           <p>
             Paid plans are billed in USD through Stripe or Creem. You can cancel anytime to stop

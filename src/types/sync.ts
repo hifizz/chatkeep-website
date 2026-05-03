@@ -1,6 +1,9 @@
 /** 可同步记录的业务类型。 */
 export type SyncRecordType = "chat" | "note";
 
+/** 服务端同步策略拒绝错误码。 */
+export type SyncPolicyErrorCode = "SYNC_DISABLED" | "SYNC_CONSENT_REQUIRED";
+
 /** 一条同步记录的标准结构。 */
 export type SyncRecordDTO = {
   recordId: string;
