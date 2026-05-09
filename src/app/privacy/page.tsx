@@ -21,16 +21,17 @@ export default function PrivacyPage() {
             approximate location derived from IP, and session replay data from Clarity.
           </p>
 
-          <h2>Local data and optional cloud sync</h2>
+          <h2>Local data and cloud sync (Pro)</h2>
           <p>
             ChatKeep is local-first by default. Your saved chats and notes stay in your browser
-            unless you sign in, review the sync privacy notice, and turn on cloud sync.
+            unless you are on a <strong>Pro plan</strong>, sign in, review the sync privacy notice,
+            and turn on cloud sync. Cloud sync is not available on the Free plan.
           </p>
           <p>
-            If you opt in to cloud sync, ChatKeep uploads the chats, notes, record identifiers,
-            timestamps, deletion markers, device identifiers, and sync metadata needed to keep your
-            signed-in devices aligned. Synced data is associated with your ChatKeep account so the
-            same account can read and update it across devices.
+            If you are on a Pro plan and opt in to cloud sync, ChatKeep uploads the chats, notes,
+            record identifiers, timestamps, deletion markers, device identifiers, and sync metadata
+            needed to keep your signed-in devices aligned. Synced data is associated with your
+            ChatKeep account so the same account can read and update it across devices.
           </p>
           <p>
             Turning cloud sync off stops future uploads and pulls for that account, but it does not

@@ -14,11 +14,14 @@ export default function TermsPage() {
             change or evolve as we improve the product.
           </p>
 
-          <h2>Optional cloud sync</h2>
+          <h2>Cloud sync (Pro feature)</h2>
           <p>
-            Cloud sync is optional. If you turn it on, you authorize ChatKeep to store and process
-            your synced chats, notes, and sync metadata so they can be available across devices
-            signed in to the same account. You are responsible for the content you choose to sync.
+            Cloud sync is an optional feature available on <strong>Pro plans</strong> (Monthly or
+            Annual). If you are on a Pro plan and choose to turn it on, you authorize ChatKeep to
+            store and process your synced chats, notes, and sync metadata so they can be available
+            across devices signed in to the same account. You are responsible for the content you
+            choose to sync. Free plan users do not have access to cloud sync; their data stays local
+            to the browser.
           </p>
           <p>
             Cloud sync is not a permanent backup service. We work to keep synced data available, but
