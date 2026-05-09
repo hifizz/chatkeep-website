@@ -38,10 +38,28 @@ export default function PrivacyPage() {
             delete the cloud copy; your local browser data is not deleted by that action.
           </p>
 
+          <h2>Quota tracking</h2>
+          <p>
+            To enforce daily limits on the Free plan (high-fidelity Markdown exports) and active
+            limits on share links, we record <strong>counters</strong> tied to your account: the UTC
+            date and the count of high-fidelity exports for that day, and the count of your active
+            share links. <strong>We do not record the chat content</strong> being exported or shared
+            as part of quota tracking, only the count and timestamp.
+          </p>
+          <p>
+            For signed-out users, a small counter is stored locally in{" "}
+            <code>chrome.storage.local</code> on your device to enforce the 1-export-per-day
+            allowance; this counter is not transmitted to our servers. To prevent double-billing on
+            retries, a short-lived idempotency record (key + result) is kept on our servers and
+            pruned after about 2 hours.
+          </p>
+
           <h2>Payments</h2>
           <p>
-            Payments are processed by Stripe and Creem. We do not store your full payment card
-            details on our servers.
+            Payments are processed by Stripe and Creem. We share your account email and a
+            subscription identifier with the chosen processor so they can create and manage your
+            subscription. <strong>We do not store your full payment card details</strong> on our
+            servers; that data lives with Stripe / Creem under their own privacy practices.
           </p>
 
           <h2>Cookies and analytics choices</h2>
@@ -59,8 +77,12 @@ export default function PrivacyPage() {
 
           <h2>Your rights</h2>
           <p>
-            You can request access, deletion, or clarification of analytics data tied to your usage
-            by contacting <a href="mailto:support@chatkeep.dev">support@chatkeep.dev</a>.
+            You can request access, export, deletion, or clarification of data tied to your account
+            by contacting <a href="mailto:support@chatkeep.dev">support@chatkeep.dev</a>. On request
+            we will provide a copy of the data we hold for your account (chats and notes you chose
+            to sync, share-link metadata, and quota counters) in a portable machine-readable format.
+            Account deletion removes your synced data, share-link rows, and quota counters;
+            locally-stored chats in your browser are not affected and remain under your control.
           </p>
 
           <h2>Changes</h2>

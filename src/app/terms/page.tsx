@@ -26,6 +26,42 @@ export default function TermsPage() {
             syncing; clearing cloud data deletes the cloud copy without deleting local browser data.
           </p>
 
+          <h2>Plans, features, and quotas</h2>
+          <p>
+            ChatKeep is offered on a Free plan and Pro plans (Monthly or Annual). Some features are
+            metered on the Free plan and unmetered on Pro:
+          </p>
+          <ul>
+            <li>
+              <strong>High-fidelity Markdown export</strong> means an export that preserves code
+              blocks, tables, math expressions, images, and structured reasoning (e.g., Deep
+              Research / thinking traces) using platform-aware conversion. The Free plan allows
+              <strong> 1 high-fidelity export per UTC day for signed-out users</strong> and{" "}
+              <strong>3 high-fidelity exports per UTC day for signed-in users</strong>; once the
+              daily quota is consumed, additional exports on Free fall back to plain text. Pro users
+              get unlimited high-fidelity exports.
+            </li>
+            <li>
+              <strong>Multi-format export</strong> (PDF / HTML / JSON) and{" "}
+              <strong>batch export</strong> are Pro-only.
+            </li>
+            <li>
+              <strong>Share links</strong>: Free users may have up to 3 active share links at any
+              time; revoking or letting an existing share expire frees a slot. Already-issued share
+              URLs continue to work even when at the limit. Pro users get unlimited active share
+              links.
+            </li>
+            <li>
+              <strong>Cloud sync across devices</strong> and{" "}
+              <strong>advanced search with preview snippets</strong> are Pro-only.
+            </li>
+          </ul>
+          <p>
+            Daily quotas reset at <strong>00:00 UTC</strong>. We may adjust quota values, feature
+            availability, or plan features with at least <strong>30 days&apos; notice</strong> for
+            material reductions affecting active subscribers.
+          </p>
+
           <h2>Subscriptions and billing</h2>
           <p>
             Paid plans are billed in USD through Stripe or Creem. You can cancel anytime to stop
