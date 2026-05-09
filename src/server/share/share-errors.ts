@@ -4,6 +4,7 @@ export type ShareErrorCode =
   | "NOT_FOUND"
   | "EXPIRED_OR_REVOKED"
   | "RATE_LIMITED"
+  | "QUOTA_EXCEEDED"
   | "VALIDATION_ERROR"
   | "INTERNAL_ERROR";
 

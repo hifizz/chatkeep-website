@@ -4,6 +4,7 @@ import { auth } from "~/lib/auth";
 import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/sync/sync-service";
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createShare, listShares } from "~/server/share/share-service";
+import { getDailyPremiumExportQuota, incrementPremiumExport } from "~/server/billing/quota";
 import {
   getSyncSettingsForUser,
   updateSyncSettingsForUser,
@@ -32,6 +33,11 @@ vi.mock("~/server/share/share-service", () => ({
   listShares: vi.fn(),
   revokeShareByOwner: vi.fn(),
   deleteShareByOwner: vi.fn(),
+}));
+
+vi.mock("~/server/billing/quota", () => ({
+  getDailyPremiumExportQuota: vi.fn(),
+  incrementPremiumExport: vi.fn(),
 }));
 
 vi.mock("~/server/sync/sync-settings-service", () => ({
@@ -366,18 +372,20 @@ describe("rpc sync settings endpoint", () => {
 });
 
 describe("rpc share endpoints", () => {
-  it("rejects non-pro user with 403", async () => {
-    vi.mocked(getProfileForUser).mockResolvedValueOnce({
-      isPro: false,
-      plan: null,
-    });
+  it("Free user can list their own shares (regression: requirePro removed)", async () => {
+    // share/list no longer looks up profile (requirePro middleware removed).
+    // The mere fact that the request returns 200 with the user's shares is
+    // the regression we're guarding — under the old code path Free users
+    // would have received 403 here.
+    vi.mocked(listShares).mockResolvedValue({ items: [] });
 
     const res = await postJson("/api/rpc/share/list", {});
-    expect(res.status).toBe(403);
-    expect(await res.json()).toMatchObject({ code: "FORBIDDEN" });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ items: [] });
   });
 
-  it("handles share create", async () => {
+  it("handles share create with isPro passed to service (Pro user)", async () => {
     vi.mocked(createShare).mockResolvedValue({
       shareId: "share-1",
       shareUrl: "http://localhost:3030/s/share-1",
@@ -408,6 +416,50 @@ describe("rpc share endpoints", () => {
       shareId: "share-1",
       accessMode: "password",
     });
+    expect(createShare).toHaveBeenCalledTimes(1);
+    const call = vi.mocked(createShare).mock.calls[0];
+    expect(call?.[0]).toBe("user-1");
+    expect(call?.[1]).toBe(true); // isPro from default mock
+    expect(call?.[2]).toMatchObject({ chatUrl: "https://chat.example/c/1" });
+  });
+
+  it("Free user share/create propagates QUOTA_EXCEEDED 403 from service", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValueOnce({
+      isPro: false,
+      plan: null,
+    });
+    const quotaErr = Object.assign(
+      new Error("已达 Free 免费 share 上限（3 个），升级 Pro 解锁无限分享"),
+      {
+        code: "QUOTA_EXCEEDED",
+        status: 403,
+        details: { used: 3, limit: 3 },
+      },
+    );
+    Object.setPrototypeOf(
+      quotaErr,
+      (await import("~/server/share/share-errors")).ShareError.prototype,
+    );
+    vi.mocked(createShare).mockRejectedValue(quotaErr);
+
+    const res = await postJson("/api/rpc/share/create", {
+      source: "sidepanel",
+      chatUrl: "https://chat.example/c/1",
+      accessMode: "public",
+      expiryMode: "permanent",
+      disclosureConfirmed: true,
+      snapshot: {
+        schemaVersion: 1,
+        title: "Demo",
+        sourceUrl: "https://chat.example/c/1",
+        platform: "ChatGPT",
+        exportedAt: "2026-04-07T00:00:00.000Z",
+        messages: [{ id: "m1", role: "user", content: "hello" }],
+      },
+    });
+
+    expect(res.status).toBe(403);
+    expect(createShare).toHaveBeenCalledWith("user-1", false, expect.anything());
   });
 
   it("accepts yuanbao platform in share snapshot payload", async () => {
@@ -439,6 +491,7 @@ describe("rpc share endpoints", () => {
     expect(res.status).toBe(200);
     expect(createShare).toHaveBeenCalledWith(
       "user-1",
+      true,
       expect.objectContaining({
         snapshot: expect.objectContaining({
           platform: "yuanbao",
@@ -468,5 +521,137 @@ describe("rpc share endpoints", () => {
     const res = await postJson("/api/rpc/share/list", {});
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ items: [{ shareId: "share-1" }] });
+  });
+});
+
+describe("rpc quota endpoints", () => {
+  it("Pro user check returns unlimited (no db touch)", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValueOnce({
+      isPro: true,
+      plan: null,
+    });
+    vi.mocked(getDailyPremiumExportQuota).mockResolvedValueOnce({
+      used: 0,
+      limit: Number.POSITIVE_INFINITY,
+      remaining: Number.POSITIVE_INFINITY,
+      resetsAt: "2026-05-10T00:00:00.000Z",
+    });
+
+    const res = await postJson("/api/rpc/quota/checkPremiumExport", {});
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.allow).toBe(true);
+    expect(body.unlimited).toBe(true);
+    expect(body.limit).toBe(null); // Infinity serialized as null
+    expect(body.remaining).toBe(null);
+  });
+
+  it("Free user check returns finite quota", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValueOnce({
+      isPro: false,
+      plan: null,
+    });
+    vi.mocked(getDailyPremiumExportQuota).mockResolvedValueOnce({
+      used: 1,
+      limit: 3,
+      remaining: 2,
+      resetsAt: "2026-05-10T00:00:00.000Z",
+    });
+
+    const res = await postJson("/api/rpc/quota/checkPremiumExport", {});
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      allow: true,
+      used: 1,
+      limit: 3,
+      remaining: 2,
+      unlimited: false,
+    });
+  });
+
+  it("Free user exhausted check returns allow=false", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValueOnce({
+      isPro: false,
+      plan: null,
+    });
+    vi.mocked(getDailyPremiumExportQuota).mockResolvedValueOnce({
+      used: 3,
+      limit: 3,
+      remaining: 0,
+      resetsAt: "2026-05-10T00:00:00.000Z",
+    });
+
+    const res = await postJson("/api/rpc/quota/checkPremiumExport", {});
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ allow: false, remaining: 0 });
+  });
+
+  it("Pro user consume returns unlimited without calling incrementPremiumExport", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValueOnce({
+      isPro: true,
+      plan: null,
+    });
+    vi.mocked(getDailyPremiumExportQuota).mockResolvedValueOnce({
+      used: 0,
+      limit: Number.POSITIVE_INFINITY,
+      remaining: Number.POSITIVE_INFINITY,
+      resetsAt: "2026-05-10T00:00:00.000Z",
+    });
+
+    const res = await postJson("/api/rpc/quota/consumePremiumExport", {
+      idempotencyKey: "11111111-1111-1111-1111-111111111111",
+    });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, unlimited: true });
+    expect(incrementPremiumExport).not.toHaveBeenCalled();
+  });
+
+  it("Free user consume calls incrementPremiumExport with idempotencyKey", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValueOnce({
+      isPro: false,
+      plan: null,
+    });
+    vi.mocked(incrementPremiumExport).mockResolvedValueOnce({
+      ok: true,
+      remaining: 2,
+      resetsAt: "2026-05-10T00:00:00.000Z",
+    });
+
+    const res = await postJson("/api/rpc/quota/consumePremiumExport", {
+      idempotencyKey: "22222222-2222-2222-2222-222222222222",
+    });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, remaining: 2, unlimited: false });
+    expect(incrementPremiumExport).toHaveBeenCalledWith(
+      "user-1",
+      "22222222-2222-2222-2222-222222222222",
+    );
+  });
+
+  it("consume rejects malformed idempotencyKey (not UUID)", async () => {
+    const res = await postJson("/api/rpc/quota/consumePremiumExport", {
+      idempotencyKey: "not-a-uuid",
+    });
+
+    expect(res.status).toBe(400);
+    expect(incrementPremiumExport).not.toHaveBeenCalled();
+  });
+
+  it("requires session for both quota endpoints", async () => {
+    vi.mocked(auth.api.getSession).mockResolvedValueOnce(null);
+
+    const checkRes = await postJson("/api/rpc/quota/checkPremiumExport", {});
+    expect(checkRes.status).toBe(401);
+
+    vi.mocked(auth.api.getSession).mockResolvedValueOnce(null);
+    const consumeRes = await postJson("/api/rpc/quota/consumePremiumExport", {
+      idempotencyKey: "33333333-3333-3333-3333-333333333333",
+    });
+    expect(consumeRes.status).toBe(401);
   });
 });

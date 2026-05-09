@@ -7,6 +7,7 @@ import {
 } from "~/server/share/share-service";
 import * as repo from "~/server/share/share-repo";
 import * as security from "~/server/share/share-security";
+import * as quota from "~/server/billing/quota";
 import { ShareError } from "~/server/share/share-errors";
 
 vi.mock("~/server/share/share-repo", () => ({
@@ -19,6 +20,35 @@ vi.mock("~/server/share/share-repo", () => ({
   markShareExpired: vi.fn(),
   deleteShare: vi.fn(),
 }));
+
+vi.mock("~/server/billing/quota", () => ({
+  getShareQuota: vi.fn(),
+  FREE_ACTIVE_SHARE_LIMIT: 3,
+}));
+
+const mockShareQuotaAvailable = (used = 0) => {
+  vi.mocked(quota.getShareQuota).mockResolvedValue({
+    used,
+    limit: 3,
+    remaining: 3 - used,
+  });
+};
+
+const mockShareQuotaProUnlimited = (used = 5) => {
+  vi.mocked(quota.getShareQuota).mockResolvedValue({
+    used,
+    limit: Number.POSITIVE_INFINITY,
+    remaining: Number.POSITIVE_INFINITY,
+  });
+};
+
+const mockShareQuotaExhausted = () => {
+  vi.mocked(quota.getShareQuota).mockResolvedValue({
+    used: 3,
+    limit: 3,
+    remaining: 0,
+  });
+};
 
 const buildRecord = (overrides: Partial<repo.ShareLinkRecord> = {}): repo.ShareLinkRecord =>
   ({
@@ -53,9 +83,10 @@ beforeEach(() => {
 
 describe("createShare", () => {
   it("uses password mode by default", async () => {
+    mockShareQuotaAvailable(0);
     vi.mocked(repo.insertShare).mockResolvedValue(buildRecord({ accessMode: "password" }));
 
-    const result = await createShare("user-1", {
+    const result = await createShare("user-1", false, {
       source: "sidepanel",
       chatUrl: "https://chat.example/c/1",
       expiryMode: "permanent",
@@ -77,8 +108,9 @@ describe("createShare", () => {
   });
 
   it("rejects too-large snapshot payload", async () => {
+    mockShareQuotaAvailable(0);
     await expect(
-      createShare("user-1", {
+      createShare("user-1", false, {
         source: "sidepanel",
         chatUrl: "https://chat.example/c/1",
         expiryMode: "permanent",
@@ -97,9 +129,10 @@ describe("createShare", () => {
   });
 
   it("persists yuanbao platform as sourcePlatform", async () => {
+    mockShareQuotaAvailable(0);
     vi.mocked(repo.insertShare).mockResolvedValue(buildRecord({ sourcePlatform: "yuanbao" }));
 
-    await createShare("user-1", {
+    await createShare("user-1", false, {
       source: "content",
       chatUrl: "https://yuanbao.tencent.com/chat/naQivTmsDa/c41d091b-8ec9-4130-854d-5bd970bc127f",
       expiryMode: "permanent",
@@ -121,6 +154,80 @@ describe("createShare", () => {
         sourcePlatform: "yuanbao",
       }),
     );
+  });
+});
+
+describe("createShare quota enforcement", () => {
+  const validRequest = {
+    source: "sidepanel" as const,
+    chatUrl: "https://chat.example/c/1",
+    expiryMode: "permanent" as const,
+    accessMode: "public" as const,
+    disclosureConfirmed: true as const,
+    snapshot: {
+      schemaVersion: 1 as const,
+      title: "Demo Chat",
+      sourceUrl: "https://chat.example/c/1",
+      platform: "ChatGPT",
+      exportedAt: "2026-04-07T00:00:00.000Z",
+      messages: [{ id: "m1", role: "user" as const, content: "hello" }],
+    },
+  };
+
+  it("allows Free user when activeCount=0/1/2", async () => {
+    vi.mocked(repo.insertShare).mockResolvedValue(buildRecord());
+
+    for (const used of [0, 1, 2]) {
+      mockShareQuotaAvailable(used);
+      vi.mocked(repo.insertShare).mockClear();
+
+      const result = await createShare("user-1", false, validRequest);
+
+      expect(result.shareId).toBeDefined();
+      expect(repo.insertShare).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it("rejects Free user when activeCount=3 with QUOTA_EXCEEDED", async () => {
+    mockShareQuotaExhausted();
+
+    await expect(createShare("user-1", false, validRequest)).rejects.toThrow(ShareError);
+
+    try {
+      await createShare("user-1", false, validRequest);
+    } catch (err) {
+      expect(err).toBeInstanceOf(ShareError);
+      expect((err as ShareError).code).toBe("QUOTA_EXCEEDED");
+      expect((err as ShareError).status).toBe(403);
+    }
+
+    expect(repo.insertShare).not.toHaveBeenCalled();
+  });
+
+  it("allows Pro user regardless of activeCount", async () => {
+    mockShareQuotaProUnlimited(100);
+    vi.mocked(repo.insertShare).mockResolvedValue(buildRecord());
+
+    const result = await createShare("user-1", true, validRequest);
+
+    expect(result.shareId).toBeDefined();
+    expect(quota.getShareQuota).toHaveBeenCalledWith("user-1", true);
+    expect(repo.insertShare).toHaveBeenCalledTimes(1);
+  });
+
+  it("checks quota BEFORE validation (fast-fail on quota even with bad payload)", async () => {
+    mockShareQuotaExhausted();
+
+    // Snapshot is invalid (will trigger size check), but quota check runs first
+    await expect(
+      createShare("user-1", false, {
+        ...validRequest,
+        snapshot: {
+          ...validRequest.snapshot,
+          messages: [{ id: "m1", role: "user", content: "a".repeat(600_000) }],
+        },
+      }),
+    ).rejects.toThrow(/Free 免费 share 上限/);
   });
 });
 

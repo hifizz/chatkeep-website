@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { env } from "~/env";
+import { getShareQuota } from "~/server/billing/quota";
 import type {
   ShareAccessMode,
   ShareActionResponseDTO,
@@ -110,10 +111,32 @@ const toListItem = (record: ShareLinkRecord): ShareListItemDTO => ({
   revokedAt: toIso(record.revokedAt),
 });
 
+/**
+ * Free users are capped at 3 active share links. Pro users are unlimited.
+ * Revoked/deleted/expired shares do not count against the quota — the cap is
+ * checked against `status='active'` only, so revoking frees a slot. Already
+ * issued share links remain accessible regardless of quota state; only NEW
+ * share creation is blocked.
+ */
+const enforceShareCreateQuota = async (userId: string, isPro: boolean) => {
+  const quota = await getShareQuota(userId, isPro);
+  if (quota.remaining <= 0) {
+    throw new ShareError(
+      "QUOTA_EXCEEDED",
+      `已达 Free 免费 share 上限（${quota.limit} 个），升级 Pro 解锁无限分享`,
+      403,
+      { used: quota.used, limit: quota.limit },
+    );
+  }
+};
+
 export const createShare = async (
   userId: string,
+  isPro: boolean,
   request: ShareCreateRequestDTO,
 ): Promise<ShareCreateResponseDTO> => {
+  await enforceShareCreateQuota(userId, isPro);
+
   if (!request.disclosureConfirmed) {
     throw new ShareError("VALIDATION_ERROR", "Disclosure confirmation is required", 400);
   }

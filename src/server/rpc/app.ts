@@ -13,6 +13,7 @@ import type {
 } from "~/types/sync";
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createCheckout } from "~/server/billing/billing-service";
+import { getDailyPremiumExportQuota, incrementPremiumExport } from "~/server/billing/quota";
 import type { CheckoutRequestDTO } from "~/lib/billing/types";
 import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/sync/sync-service";
 import {
@@ -46,6 +47,7 @@ type RpcErrorCode =
   | "NOT_FOUND"
   | "EXPIRED_OR_REVOKED"
   | "RATE_LIMITED"
+  | "QUOTA_EXCEEDED"
   | "VALIDATION_ERROR"
   | "INTERNAL_ERROR"
   | SyncPolicyErrorCode;
@@ -143,24 +145,6 @@ const requireSession: MiddlewareHandler<{ Variables: RpcVariables }> = async (c,
   await next();
 };
 
-const requirePro: MiddlewareHandler<{ Variables: RpcVariables }> = async (c, next) => {
-  const session = c.get("session");
-  const profile = await getProfileForUser(session.user.id);
-  if (!profile.isPro) {
-    return rpcError(
-      c,
-      {
-        error: "Share links are available for Pro users only",
-        code: "FORBIDDEN",
-        details: { upgradeUrl: "/pricing" },
-      },
-      403,
-    );
-  }
-
-  await next();
-};
-
 const EchoSchema = z.object({
   message: z.string().min(1),
 });
@@ -253,6 +237,26 @@ const ShareListSchema = z.object({});
 
 const ShareActionSchema = z.object({
   shareId: z.string().uuid(),
+});
+
+const QuotaCheckSchema = z.object({});
+
+const QuotaConsumeSchema = z.object({
+  idempotencyKey: z.string().uuid(),
+});
+
+const serializeQuota = (q: {
+  used: number;
+  limit: number;
+  remaining: number;
+  resetsAt: string;
+}) => ({
+  used: q.used,
+  // Infinity is not JSON-serializable; use null to denote unlimited.
+  limit: Number.isFinite(q.limit) ? q.limit : null,
+  remaining: Number.isFinite(q.remaining) ? q.remaining : null,
+  resetsAt: q.resetsAt,
+  unlimited: !Number.isFinite(q.limit),
 });
 
 const app = new Hono<{ Variables: RpcVariables }>().basePath("/api");
@@ -352,86 +356,115 @@ const routes = app
       }
     },
   )
+  .post("/rpc/share/create", requireSession, zValidator("json", ShareCreateSchema), async (c) => {
+    const session = c.get("session");
+    const input = c.req.valid("json") as ShareCreateRequestDTO;
+    const limit = takeRateLimit(`share:create:${session.user.id}`, 10, 60_000);
+    if (!limit.allowed) {
+      return rpcError(
+        c,
+        {
+          error: "Too many requests, please retry later",
+          code: "RATE_LIMITED",
+          details: { retryAfterMs: limit.retryAfterMs },
+        },
+        429,
+      );
+    }
+
+    try {
+      const profile = await getProfileForUser(session.user.id);
+      const response = await createShare(session.user.id, profile.isPro, input);
+      return c.json(response as ShareCreateResponseDTO);
+    } catch (error) {
+      const mapped = mapShareError(error);
+      return rpcError(c, mapped.payload, mapped.status);
+    }
+  })
+  .post("/rpc/share/list", requireSession, zValidator("json", ShareListSchema), async (c) => {
+    const session = c.get("session");
+
+    try {
+      const response = await listShares(session.user.id);
+      return c.json(response as ShareListResponseDTO);
+    } catch (error) {
+      const mapped = mapShareError(error);
+      return rpcError(c, mapped.payload, mapped.status);
+    }
+  })
+  .post("/rpc/share/revoke", requireSession, zValidator("json", ShareActionSchema), async (c) => {
+    const session = c.get("session");
+    const { shareId } = c.req.valid("json");
+
+    try {
+      const response = await revokeShareByOwner(session.user.id, shareId);
+      return c.json(response as ShareActionResponseDTO);
+    } catch (error) {
+      const mapped = mapShareError(error);
+      return rpcError(c, mapped.payload, mapped.status);
+    }
+  })
+  .post("/rpc/share/delete", requireSession, zValidator("json", ShareActionSchema), async (c) => {
+    const session = c.get("session");
+    const { shareId } = c.req.valid("json");
+
+    try {
+      const response = await deleteShareByOwner(session.user.id, shareId);
+      return c.json(response as ShareActionResponseDTO);
+    } catch (error) {
+      const mapped = mapShareError(error);
+      return rpcError(c, mapped.payload, mapped.status);
+    }
+  })
   .post(
-    "/rpc/share/create",
+    "/rpc/quota/checkPremiumExport",
     requireSession,
-    requirePro,
-    zValidator("json", ShareCreateSchema),
+    zValidator("json", QuotaCheckSchema),
     async (c) => {
       const session = c.get("session");
-      const input = c.req.valid("json") as ShareCreateRequestDTO;
-      const limit = takeRateLimit(`share:create:${session.user.id}`, 10, 60_000);
-      if (!limit.allowed) {
-        return rpcError(
-          c,
-          {
-            error: "Too many requests, please retry later",
-            code: "RATE_LIMITED",
-            details: { retryAfterMs: limit.retryAfterMs },
-          },
-          429,
-        );
-      }
-
       try {
-        const response = await createShare(session.user.id, input);
-        return c.json(response as ShareCreateResponseDTO);
-      } catch (error) {
-        const mapped = mapShareError(error);
-        return rpcError(c, mapped.payload, mapped.status);
+        const profile = await getProfileForUser(session.user.id);
+        const q = await getDailyPremiumExportQuota(session.user.id, profile.isPro);
+        return c.json({
+          allow: profile.isPro || q.remaining > 0,
+          ...serializeQuota(q),
+        });
+      } catch {
+        return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
       }
     },
   )
   .post(
-    "/rpc/share/list",
+    "/rpc/quota/consumePremiumExport",
     requireSession,
-    requirePro,
-    zValidator("json", ShareListSchema),
+    zValidator("json", QuotaConsumeSchema),
     async (c) => {
       const session = c.get("session");
-
+      const { idempotencyKey } = c.req.valid("json");
       try {
-        const response = await listShares(session.user.id);
-        return c.json(response as ShareListResponseDTO);
-      } catch (error) {
-        const mapped = mapShareError(error);
-        return rpcError(c, mapped.payload, mapped.status);
-      }
-    },
-  )
-  .post(
-    "/rpc/share/revoke",
-    requireSession,
-    requirePro,
-    zValidator("json", ShareActionSchema),
-    async (c) => {
-      const session = c.get("session");
-      const { shareId } = c.req.valid("json");
+        const profile = await getProfileForUser(session.user.id);
 
-      try {
-        const response = await revokeShareByOwner(session.user.id, shareId);
-        return c.json(response as ShareActionResponseDTO);
-      } catch (error) {
-        const mapped = mapShareError(error);
-        return rpcError(c, mapped.payload, mapped.status);
-      }
-    },
-  )
-  .post(
-    "/rpc/share/delete",
-    requireSession,
-    requirePro,
-    zValidator("json", ShareActionSchema),
-    async (c) => {
-      const session = c.get("session");
-      const { shareId } = c.req.valid("json");
+        // Pro users do not consume quota. Short-circuit before touching the
+        // database to keep the hot path zero-write for Pro.
+        if (profile.isPro) {
+          const q = await getDailyPremiumExportQuota(session.user.id, true);
+          return c.json({
+            ok: true,
+            remaining: null,
+            resetsAt: q.resetsAt,
+            unlimited: true,
+          });
+        }
 
-      try {
-        const response = await deleteShareByOwner(session.user.id, shareId);
-        return c.json(response as ShareActionResponseDTO);
-      } catch (error) {
-        const mapped = mapShareError(error);
-        return rpcError(c, mapped.payload, mapped.status);
+        const result = await incrementPremiumExport(session.user.id, idempotencyKey);
+        return c.json({
+          ok: result.ok,
+          remaining: result.remaining,
+          resetsAt: result.resetsAt,
+          unlimited: false,
+        });
+      } catch {
+        return rpcError(c, { error: "Internal server error", code: "INTERNAL_ERROR" }, 500);
       }
     },
   );
