@@ -4,14 +4,15 @@
 import { sql } from "drizzle-orm";
 import {
   bigint,
+  date,
   index,
+  integer,
   primaryKey,
   pgTableCreator,
   text,
   timestamp,
   boolean,
   uniqueIndex,
-  // integer,
   // pgTable,
 } from "drizzle-orm/pg-core";
 
@@ -161,6 +162,44 @@ export const billingWebhookEvent = createTable(
   (t) => [index("billing_webhook_event_provider_idx").on(t.provider)],
 );
 
+export const userDailyQuota = createTable(
+  "user_daily_quota",
+  () => ({
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    date: date("date").notNull(),
+    premiumExportCount: integer("premium_export_count").default(0).notNull(),
+    promptCount: integer("prompt_count").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [primaryKey({ columns: [t.userId, t.date] })],
+);
+
+export const quotaIdempotency = createTable(
+  "quota_idempotency",
+  () => ({
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    idempotencyKey: text("idempotency_key").notNull(),
+    resultOk: boolean("result_ok").notNull(),
+    resultRemaining: integer("result_remaining").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  }),
+  (t) => [
+    primaryKey({ columns: [t.userId, t.idempotencyKey] }),
+    index("quota_idempotency_created_at_idx").on(t.createdAt),
+  ],
+);
+
 export const shareLink = createTable(
   "share_link",
   () => ({
@@ -190,6 +229,7 @@ export const shareLink = createTable(
     index("share_link_owner_idx").on(t.ownerUserId),
     index("share_link_status_idx").on(t.status),
     index("share_link_expires_at_idx").on(t.expiresAt),
+    index("share_link_owner_status_idx").on(t.ownerUserId, t.status),
   ],
 );
 

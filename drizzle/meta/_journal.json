@@ -50,6 +50,13 @@
       "when": 1777631656046,
       "tag": "0006_spotty_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778326685938,
+      "tag": "0007_pink_starjammers",
+      "breakpoints": true
     }
   ]
 }
