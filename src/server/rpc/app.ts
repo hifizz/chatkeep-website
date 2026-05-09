@@ -79,7 +79,31 @@ const mapShareError = (error: unknown) => {
   };
 };
 
+/**
+ * Cloud sync gate. The order matters: Pro is checked first so Free users
+ * get a single FORBIDDEN signal rather than leaking whether they have
+ * sync enabled or consented (irrelevant when their plan can't sync at all).
+ *
+ * Pro check failure  → 403 + FORBIDDEN  (upgrade-CTA path)
+ * Sync disabled      → 403 + SYNC_DISABLED (settings-toggle path)
+ * Consent missing    → 403 + SYNC_CONSENT_REQUIRED (consent-dialog path)
+ *
+ * Returns a Response on rejection or null when the request may proceed.
+ */
 async function rejectDisallowedSyncPolicy(c: Parameters<MiddlewareHandler>[0], userId: string) {
+  const profile = await getProfileForUser(userId);
+  if (!profile.isPro) {
+    return rpcError(
+      c,
+      {
+        error: "Cloud sync requires a Pro subscription",
+        code: "FORBIDDEN",
+        details: { upgradeUrl: "/pricing" },
+      },
+      403,
+    );
+  }
+
   const settings = await getSyncSettingsForUser(userId);
 
   if (!settings.enabled) {
@@ -332,6 +356,20 @@ const routes = app
     const _input = c.req.valid("json") as SyncClearRequestDTO;
 
     try {
+      // Cloud sync is Pro-only. Free users have no data to clear (they
+      // couldn't have synced any to begin with) so we reject defensively.
+      const profile = await getProfileForUser(session.user.id);
+      if (!profile.isPro) {
+        return rpcError(
+          c,
+          {
+            error: "Cloud sync requires a Pro subscription",
+            code: "FORBIDDEN",
+            details: { upgradeUrl: "/pricing" },
+          },
+          403,
+        );
+      }
       const response = await clearSyncRecords({
         userId: session.user.id,
       });
@@ -349,6 +387,25 @@ const routes = app
       const input = c.req.valid("json") as SyncSettingsUpdateRequestDTO;
 
       try {
+        // Cloud sync is Pro-only. Block Free users from flipping
+        // `enabled` or recording consent — those settings only matter for
+        // a feature they can't access. The check covers both directions:
+        // Free can't write enabled=true, and we also block enabled=false
+        // because the only reason a non-Pro user would hit this endpoint
+        // is the sidepanel UI, which we've gated; any other caller is
+        // suspect.
+        const profile = await getProfileForUser(session.user.id);
+        if (!profile.isPro) {
+          return rpcError(
+            c,
+            {
+              error: "Cloud sync requires a Pro subscription",
+              code: "FORBIDDEN",
+              details: { upgradeUrl: "/pricing" },
+            },
+            403,
+          );
+        }
         const response = await updateSyncSettingsForUser(session.user.id, input);
         return c.json(response);
       } catch {

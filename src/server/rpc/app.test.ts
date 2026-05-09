@@ -226,6 +226,55 @@ describe("rpc sync endpoints", () => {
     expect(pullSyncRecords).not.toHaveBeenCalled();
   });
 
+  it("rejects pull with FORBIDDEN when user is not Pro (Pro gate before sync policy)", async () => {
+    // Pro check MUST run before enabled/consent checks — Free users see
+    // FORBIDDEN, never SYNC_DISABLED, even if their settings would
+    // technically be 'disabled'. This prevents leaking sync state to
+    // users who can't access it.
+    vi.mocked(getProfileForUser).mockResolvedValue({ isPro: false, plan: null });
+    allowSyncPolicy();
+
+    const res = await postJson("/api/rpc/sync/pull", { deviceId: "device-1" });
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.code).toBe("FORBIDDEN");
+    expect(body.error).toMatch(/Pro/);
+    expect(getSyncSettingsForUser).not.toHaveBeenCalled();
+    expect(pullSyncRecords).not.toHaveBeenCalled();
+  });
+
+  it("rejects push with FORBIDDEN when user is not Pro", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValue({ isPro: false, plan: null });
+    allowSyncPolicy();
+
+    const res = await postJson("/api/rpc/sync/push", {
+      deviceId: "device-1",
+      records: [
+        {
+          recordId: "r-1",
+          recordType: "chat",
+          payload: "{}",
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe("FORBIDDEN");
+    expect(pushSyncRecords).not.toHaveBeenCalled();
+  });
+
+  it("rejects clear with FORBIDDEN when user is not Pro", async () => {
+    vi.mocked(getProfileForUser).mockResolvedValue({ isPro: false, plan: null });
+
+    const res = await postJson("/api/rpc/sync/clear", { deviceId: "device-1" });
+
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe("FORBIDDEN");
+    expect(clearSyncRecords).not.toHaveBeenCalled();
+  });
+
   it("rejects push when sync consent is missing", async () => {
     vi.mocked(getSyncSettingsForUser).mockResolvedValue({
       enabled: true,
@@ -360,6 +409,19 @@ describe("rpc sync settings endpoint", () => {
     const res = await postJson("/api/rpc/settings/sync/update", { enabled: true });
 
     expect(res.status).toBe(401);
+    expect(updateSyncSettingsForUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects with FORBIDDEN when user is not Pro", async () => {
+    // Even Free users trying to flip the toggle off (enabled=false) get
+    // 403 — the only legitimate caller is the sidepanel UI, which we've
+    // already gated. Anything else hitting the endpoint is suspect.
+    vi.mocked(getProfileForUser).mockResolvedValue({ isPro: false, plan: null });
+
+    const res = await postJson("/api/rpc/settings/sync/update", { enabled: false });
+
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe("FORBIDDEN");
     expect(updateSyncSettingsForUser).not.toHaveBeenCalled();
   });
 
