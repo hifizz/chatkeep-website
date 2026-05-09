@@ -171,45 +171,44 @@ export const incrementPremiumExport = async (
       return { ok: row.ok, remaining: Math.max(0, row.remaining), resetsAt };
     }
 
-    // Step 2: we own the claim. Read current count and decide whether to
-    // increment.
-    const currentRows = await tx
-      .select({ count: userDailyQuota.premiumExportCount })
-      .from(userDailyQuota)
-      .where(and(eq(userDailyQuota.userId, userId), eq(userDailyQuota.date, date)))
-      .limit(1);
-    const currentCount = currentRows[0]?.count ?? 0;
+    // Step 2: conditionally increment. The UPSERT's WHERE clause makes the
+    // UPDATE branch a no-op when the row is already at or above the limit —
+    // RETURNING comes back empty in that case, telling us we lost without
+    // having mutated anything. This closes the over-shoot bug where two
+    // concurrent same-user txns would each pass an unguarded pre-check at
+    // count=2 and each `+1`, leaving the row at 4 (limit=3). Now the second
+    // txn's UPDATE is filtered out by `count < limit` and the row stays at 3.
+    //
+    // The INSERT branch (no row yet) always succeeds with count=1; that's
+    // safe because limit >= 1 and we want to allow the very first consume.
+    const upserted = await tx
+      .insert(userDailyQuota)
+      .values({
+        userId,
+        date,
+        premiumExportCount: 1,
+        promptCount: 0,
+      })
+      .onConflictDoUpdate({
+        target: [userDailyQuota.userId, userDailyQuota.date],
+        set: {
+          premiumExportCount: sql`${userDailyQuota.premiumExportCount} + 1`,
+          updatedAt: new Date(),
+        },
+        setWhere: sql`${userDailyQuota.premiumExportCount} < ${limit}`,
+      })
+      .returning({ count: userDailyQuota.premiumExportCount });
 
     let resultOk: boolean;
     let resultRemaining: number;
 
-    if (currentCount >= limit) {
+    if (upserted.length === 0) {
+      // Conditional UPDATE skipped — already at limit, nothing changed.
       resultOk = false;
       resultRemaining = 0;
     } else {
-      // UPSERT atomic +1. ON CONFLICT handles concurrent inserts on the same
-      // (userId, date) PK across DIFFERENT idempotency keys (different users
-      // counting against the same day). RETURNING gives the post-increment
-      // count so we detect overshoot from concurrent same-user increments
-      // and clamp without granting an extra slot.
-      const upserted = await tx
-        .insert(userDailyQuota)
-        .values({
-          userId,
-          date,
-          premiumExportCount: 1,
-          promptCount: 0,
-        })
-        .onConflictDoUpdate({
-          target: [userDailyQuota.userId, userDailyQuota.date],
-          set: {
-            premiumExportCount: sql`${userDailyQuota.premiumExportCount} + 1`,
-            updatedAt: new Date(),
-          },
-        })
-        .returning({ count: userDailyQuota.premiumExportCount });
-      const newCount = upserted[0]?.count ?? currentCount + 1;
-      resultOk = newCount <= limit;
+      const newCount = upserted[0]!.count;
+      resultOk = true;
       resultRemaining = Math.max(0, limit - newCount);
     }
 

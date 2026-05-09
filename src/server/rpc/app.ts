@@ -441,6 +441,27 @@ const routes = app
     async (c) => {
       const session = c.get("session");
       const { idempotencyKey } = c.req.valid("json");
+
+      // Rate limit consume to bound writes to the quota_idempotency table.
+      // Without this gate, an exhausted Free user (or any abusive client)
+      // can fire infinite POSTs with random UUIDs and each one persists a
+      // failed-result row, growing the table without bound until the
+      // 2-hour cleanup catches up. Match share/create's 10/min/user budget;
+      // legitimate clients only ever issue one consume per user-initiated
+      // export, with retries reusing the same idempotencyKey.
+      const limit = takeRateLimit(`quota:consume:${session.user.id}`, 10, 60_000);
+      if (!limit.allowed) {
+        return rpcError(
+          c,
+          {
+            error: "Too many requests, please retry later",
+            code: "RATE_LIMITED",
+            details: { retryAfterMs: limit.retryAfterMs },
+          },
+          429,
+        );
+      }
+
       try {
         const profile = await getProfileForUser(session.user.id);
 

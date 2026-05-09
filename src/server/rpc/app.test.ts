@@ -5,6 +5,7 @@ import { clearSyncRecords, pullSyncRecords, pushSyncRecords } from "~/server/syn
 import { getProfileForUser } from "~/server/billing/profile-service";
 import { createShare, listShares } from "~/server/share/share-service";
 import { getDailyPremiumExportQuota, incrementPremiumExport } from "~/server/billing/quota";
+import { __test__ as rateLimitTestApi } from "~/server/share/share-rate-limit";
 import {
   getSyncSettingsForUser,
   updateSyncSettingsForUser,
@@ -86,6 +87,10 @@ const allowSyncPolicy = () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // share-rate-limit holds a process-wide Map keyed by `<route>:<userId>`.
+  // Without this reset, consume budget bleeds across tests and makes the
+  // 10/min assertion order-dependent.
+  rateLimitTestApi.reset();
   vi.mocked(auth.api.getSession).mockResolvedValue(session);
   vi.mocked(getProfileForUser).mockResolvedValue({
     isPro: true,
@@ -653,5 +658,36 @@ describe("rpc quota endpoints", () => {
       idempotencyKey: "33333333-3333-3333-3333-333333333333",
     });
     expect(consumeRes.status).toBe(401);
+  });
+
+  it("consume is rate-limited at 10 requests/min/user", async () => {
+    // Bound writes to quota_idempotency. An exhausted Free client without
+    // this gate could fire infinite POSTs with random UUIDs and each one
+    // would persist a row before getting ok:false. The 11th call in a 60s
+    // window from one user must be 429, not even reaching the service.
+    vi.mocked(getProfileForUser).mockResolvedValue({
+      isPro: false,
+      plan: null,
+    });
+    vi.mocked(incrementPremiumExport).mockResolvedValue({
+      ok: true,
+      remaining: 2,
+      resetsAt: "2026-05-10T00:00:00.000Z",
+    });
+
+    for (let i = 0; i < 10; i += 1) {
+      const res = await postJson("/api/rpc/quota/consumePremiumExport", {
+        idempotencyKey: `44444444-4444-4444-4444-44444444444${i}`,
+      });
+      expect(res.status).toBe(200);
+    }
+
+    const overflowRes = await postJson("/api/rpc/quota/consumePremiumExport", {
+      idempotencyKey: "44444444-4444-4444-4444-444444444499",
+    });
+    expect(overflowRes.status).toBe(429);
+    expect(await overflowRes.json()).toMatchObject({ code: "RATE_LIMITED" });
+    // Service must NOT be invoked on the rate-limited request.
+    expect(incrementPremiumExport).toHaveBeenCalledTimes(10);
   });
 });
