@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { env } from "~/env";
-import { getShareQuota } from "~/server/billing/quota";
+import { db } from "~/server/db";
+import { acquireUserShareLock, getShareQuota } from "~/server/billing/quota";
 import type {
   ShareAccessMode,
   ShareActionResponseDTO,
@@ -112,14 +113,24 @@ const toListItem = (record: ShareLinkRecord): ShareListItemDTO => ({
 });
 
 /**
- * Free users are capped at 3 active share links. Pro users are unlimited.
- * Revoked/deleted/expired shares do not count against the quota — the cap is
- * checked against `status='active'` only, so revoking frees a slot. Already
- * issued share links remain accessible regardless of quota state; only NEW
- * share creation is blocked.
+ * Free users are capped at 3 active (non-expired) share links. Pro users are
+ * unlimited. Revoked/deleted/expired shares do not count against the quota —
+ * revoking or letting a share expire frees a slot. Already issued share links
+ * remain accessible regardless of quota state; only NEW creation is blocked.
+ *
+ * MUST be called inside a transaction that already holds
+ * `acquireUserShareLock(tx, userId)` — otherwise the count→insert sequence has
+ * a TOCTOU race where two concurrent /share/create from the same Free user
+ * both see remaining=1 and both insert.
  */
-const enforceShareCreateQuota = async (userId: string, isPro: boolean) => {
-  const quota = await getShareQuota(userId, isPro);
+import type { QuotaDbClient } from "~/server/billing/quota";
+
+const throwIfShareQuotaExhausted = async (
+  client: QuotaDbClient,
+  userId: string,
+  isPro: boolean,
+) => {
+  const quota = await getShareQuota(userId, isPro, client);
   if (quota.remaining <= 0) {
     throw new ShareError(
       "QUOTA_EXCEEDED",
@@ -135,8 +146,8 @@ export const createShare = async (
   isPro: boolean,
   request: ShareCreateRequestDTO,
 ): Promise<ShareCreateResponseDTO> => {
-  await enforceShareCreateQuota(userId, isPro);
-
+  // Validation runs OUTSIDE the transaction — pure CPU work, no DB calls,
+  // no point holding a lock for it.
   if (!request.disclosureConfirmed) {
     throw new ShareError("VALIDATION_ERROR", "Disclosure confirmation is required", 400);
   }
@@ -177,21 +188,34 @@ export const createShare = async (
 
   const snapshot = sanitizeSnapshot(request.snapshot);
   const shareId = randomUUID();
-  const record = await insertShare({
-    id: shareId,
-    ownerUserId: userId,
-    title: snapshot.title || "Untitled Chat",
-    sourceChatUrl: request.chatUrl,
-    sourcePlatform: snapshot.platform || "unknown",
-    accessMode,
-    expiryMode: request.expiryMode,
-    expiresAt,
-    passwordHash,
-    passwordSalt,
-    status: "active",
-    snapshotJson: JSON.stringify(snapshot),
-    createdAt: new Date(),
-    updatedAt: new Date(),
+
+  // Quota check + insert MUST be atomic. Without the per-user advisory lock,
+  // two concurrent Free /share/create requests can both pass remaining=1 and
+  // each insert, leaving the user with 4 active shares. The lock is released
+  // at tx commit/rollback; throughput cost is negligible since concurrent
+  // share creation from the same user is rare.
+  const record = await db.transaction(async (tx) => {
+    await acquireUserShareLock(tx, userId);
+    await throwIfShareQuotaExhausted(tx, userId, isPro);
+    return insertShare(
+      {
+        id: shareId,
+        ownerUserId: userId,
+        title: snapshot.title || "Untitled Chat",
+        sourceChatUrl: request.chatUrl,
+        sourcePlatform: snapshot.platform || "unknown",
+        accessMode,
+        expiryMode: request.expiryMode,
+        expiresAt,
+        passwordHash,
+        passwordSalt,
+        status: "active",
+        snapshotJson: JSON.stringify(snapshot),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      tx,
+    );
   });
 
   if (!record) {

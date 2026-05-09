@@ -1,12 +1,13 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "~/server/db";
 import { shareLink, user } from "~/server/db/schema";
+import type { QuotaDbClient } from "~/server/billing/quota";
 
 export type ShareLinkRecord = typeof shareLink.$inferSelect;
 export type ShareLinkInsert = typeof shareLink.$inferInsert;
 
-export const insertShare = async (input: ShareLinkInsert) => {
-  const rows = await db.insert(shareLink).values(input).returning();
+export const insertShare = async (input: ShareLinkInsert, client: QuotaDbClient = db) => {
+  const rows = await client.insert(shareLink).values(input).returning();
   return rows[0] ?? null;
 };
 

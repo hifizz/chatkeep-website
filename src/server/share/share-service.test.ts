@@ -23,8 +23,22 @@ vi.mock("~/server/share/share-repo", () => ({
 
 vi.mock("~/server/billing/quota", () => ({
   getShareQuota: vi.fn(),
+  acquireUserShareLock: vi.fn().mockResolvedValue(undefined),
   FREE_ACTIVE_SHARE_LIMIT: 3,
 }));
+
+// share-service now wraps quota check + insertShare in db.transaction +
+// per-user advisory lock to close the TOCTOU race. The test mock makes
+// transaction() invoke the callback immediately with a fake tx handle, so
+// no real Postgres connection is opened.
+vi.mock("~/server/db", () => {
+  const fakeTx = { __isFakeTx: true } as const;
+  return {
+    db: {
+      transaction: vi.fn(async (cb: (tx: unknown) => unknown) => cb(fakeTx)),
+    },
+  };
+});
 
 const mockShareQuotaAvailable = (used = 0) => {
   vi.mocked(quota.getShareQuota).mockResolvedValue({
@@ -150,9 +164,8 @@ describe("createShare", () => {
     });
 
     expect(repo.insertShare).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sourcePlatform: "yuanbao",
-      }),
+      expect.objectContaining({ sourcePlatform: "yuanbao" }),
+      expect.anything(), // tx client passed by createShare's transaction wrapper
     );
   });
 });
@@ -211,14 +224,22 @@ describe("createShare quota enforcement", () => {
     const result = await createShare("user-1", true, validRequest);
 
     expect(result.shareId).toBeDefined();
-    expect(quota.getShareQuota).toHaveBeenCalledWith("user-1", true);
+    expect(quota.getShareQuota).toHaveBeenCalledWith(
+      "user-1",
+      true,
+      expect.anything(), // tx client (advisory lock acquired before this call)
+    );
     expect(repo.insertShare).toHaveBeenCalledTimes(1);
   });
 
-  it("checks quota BEFORE validation (fast-fail on quota even with bad payload)", async () => {
+  it("runs validation before quota check (no DB hit on bad payload)", async () => {
+    // The TOCTOU fix moved quota check inside db.transaction. Validation
+    // (snapshot size, password rules, expiresAt sanity) runs OUTSIDE the
+    // transaction to avoid acquiring an advisory lock for malformed input.
+    // The reverse order would burn DB locks on every garbage request — a
+    // small DoS amplifier.
     mockShareQuotaExhausted();
 
-    // Snapshot is invalid (will trigger size check), but quota check runs first
     await expect(
       createShare("user-1", false, {
         ...validRequest,
@@ -227,7 +248,10 @@ describe("createShare quota enforcement", () => {
           messages: [{ id: "m1", role: "user", content: "a".repeat(600_000) }],
         },
       }),
-    ).rejects.toThrow(/Free 免费 share 上限/);
+    ).rejects.toThrow(/Snapshot too large/);
+
+    // Quota check must NOT have been invoked — validation short-circuited.
+    expect(quota.getShareQuota).not.toHaveBeenCalled();
   });
 });
 
