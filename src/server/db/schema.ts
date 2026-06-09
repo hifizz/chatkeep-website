@@ -295,3 +295,33 @@ export const extensionReleaseLatest = createTable(
   }),
   (t) => [index("extension_release_latest_release_idx").on(t.releaseRecordId)],
 );
+
+/** 用户发布的产物（Artifact Publish）。系统真相;R2 `meta/{id}.json` 为 Worker 读缓存。 */
+export const artifact = createTable(
+  "published_artifact",
+  () => ({
+    id: text("id").primaryKey(),
+    ownerUserId: text("owner_user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    blobHash: text("blob_hash").notNull(),
+    title: text("title").notNull(),
+    platform: text("platform").notNull(),
+    kind: text("kind").notNull(),
+    accessMode: text("access_mode").notNull(),
+    status: text("status").notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    expiresAt: timestamp("expires_at"),
+    revokedAt: timestamp("revoked_at"),
+  }),
+  (t) => [
+    index("published_artifact_owner_idx").on(t.ownerUserId),
+    index("published_artifact_status_idx").on(t.status),
+    index("published_artifact_blob_hash_idx").on(t.blobHash),
+  ],
+);

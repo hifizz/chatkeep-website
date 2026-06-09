@@ -33,6 +33,8 @@ import type {
 } from "~/types/share";
 import { asShareError } from "~/server/share/share-errors";
 import { takeRateLimit } from "~/server/share/share-rate-limit";
+import { createArtifact } from "~/server/artifact/artifact-service";
+import type { ArtifactPublishRequestDTO, ArtifactPublishResponseDTO } from "~/types/artifact";
 
 type SessionData = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
 
@@ -255,6 +257,14 @@ const ShareActionSchema = z.object({
   shareId: z.string().uuid(),
 });
 
+const ArtifactCreateSchema = z.object({
+  source: z.enum(["content", "sidepanel"]).optional(),
+  platform: z.string().min(1),
+  title: z.string().min(1),
+  kind: z.literal("html"),
+  html: z.string().min(1),
+});
+
 const app = new Hono<{ Variables: RpcVariables }>().basePath("/api");
 
 const routes = app
@@ -376,6 +386,36 @@ const routes = app
       try {
         const response = await createShare(session.user.id, input);
         return c.json(response as ShareCreateResponseDTO);
+      } catch (error) {
+        const mapped = mapShareError(error);
+        return rpcError(c, mapped.payload, mapped.status);
+      }
+    },
+  )
+  .post(
+    "/rpc/artifact/create",
+    requireSession,
+    zValidator("json", ArtifactCreateSchema),
+    async (c) => {
+      const session = c.get("session");
+      const input = c.req.valid("json") as ArtifactPublishRequestDTO;
+      const limit = takeRateLimit(`artifact:create:${session.user.id}`, 20, 60_000);
+      if (!limit.allowed) {
+        return rpcError(
+          c,
+          {
+            error: "Too many requests, please retry later",
+            code: "RATE_LIMITED",
+            details: { retryAfterMs: limit.retryAfterMs },
+          },
+          429,
+        );
+      }
+
+      try {
+        const profile = await getProfileForUser(session.user.id);
+        const response = await createArtifact(session.user.id, profile.isPro, input);
+        return c.json(response as ArtifactPublishResponseDTO);
       } catch (error) {
         const mapped = mapShareError(error);
         return rpcError(c, mapped.payload, mapped.status);

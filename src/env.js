@@ -24,6 +24,14 @@ export const env = createEnv({
     RELEASE_SYNC_SECRET: z.string().optional(),
     RELEASE_SYNC_ALLOWED_REPO: z.string().optional(),
     RELEASE_DISPLAY_CHANNEL: z.enum(["dev", "stable"]).optional(),
+    // Cloudflare R2 (artifact publish). Optional so envs without it still build;
+    // the artifact service throws a clear error at use-time if unset.
+    R2_ACCOUNT_ID: z.string().optional(),
+    R2_ACCESS_KEY_ID: z.string().optional(),
+    R2_SECRET_ACCESS_KEY: z.string().optional(),
+    R2_ENDPOINT: z.string().url().optional(),
+    R2_BUCKET: z.string().optional(),
+    ARTIFACT_PAGES_BASE_URL: z.string().url().optional(),
   },
 
   /**
@@ -58,6 +66,12 @@ export const env = createEnv({
     RELEASE_SYNC_SECRET: process.env.RELEASE_SYNC_SECRET,
     RELEASE_SYNC_ALLOWED_REPO: process.env.RELEASE_SYNC_ALLOWED_REPO,
     RELEASE_DISPLAY_CHANNEL: process.env.RELEASE_DISPLAY_CHANNEL,
+    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    R2_ENDPOINT: process.env.R2_ENDPOINT,
+    R2_BUCKET: process.env.R2_BUCKET,
+    ARTIFACT_PAGES_BASE_URL: process.env.ARTIFACT_PAGES_BASE_URL,
     NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
     NEXT_PUBLIC_CLARITY_ID: process.env.NEXT_PUBLIC_CLARITY_ID,
   },
